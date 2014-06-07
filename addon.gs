@@ -43,9 +43,7 @@ function prepareSnippet(fullText, tip){
     }
   }
 
-  var ret = snippet.replace(match, "<span class=\"igc-match-content\">" + match +"</span>");
-  Logger.log(ret);
-  return ret
+  return snippet.replace(match, "<span class=\"igc-match-content\">" + match +"</span>");
 }
 
 function onOpen(e) {
@@ -90,9 +88,3 @@ function getPreferences() {
   };
   return languagePrefs;
 }
-
-function runTranslation(origin, dest, savePrefs) {
-  var text = getSelectedText();
-
-}
-

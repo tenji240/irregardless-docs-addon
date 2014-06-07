@@ -85,6 +85,31 @@
 
 <script>
 
+  function tipToHtml(tip){
+    return "<li class=\"tip-container\">"+
+      "<div class=\"text-snippet\">"+
+        tip.text_snippet +
+      "</div>"+
+      "<div class=\"tip clearfix\">"+
+        "<div class=\"match-string\">"+
+          tip.matched_string +
+        "</div>"+
+        "<div class=\"explanation\">"+
+          tip.explanation +
+        "</div>"+
+        "<div class=\"replacements\">"+
+          "<span>Instead Try:</span>"+
+          "<ul>"+
+          "</ul>"+
+        "</div>"+
+        "<div class=\"creator\">"+
+          "<img src=" + tip.creator_mugshot_url + ">"+
+            "<div>" + tip.creator_name + "</div>"+
+        "</div>"+
+      "</div>"+
+    "</li>";
+  }
+
   var $loading = $("#loading"),
       $noResults = $("#no-results"),
       $error = $("#error");
@@ -138,7 +163,10 @@
       google.script.run
         .withSuccessHandler(
           function(snippet) {
-            $('.tips-list').append(snippet);
+            var _tip = JSON.parse(JSON.stringify(tip));
+            _tip.text_snippet = snippet;
+            var html = tipToHtml(_tip);
+            $('.tips-list').append(html);
           })
         .withFailureHandler(
           function(msg, element) {
