@@ -41,8 +41,9 @@
   padding: 0 12px;
 }
 
-.bottom {
+.footer {
   position: fixed;
+  width: 100%;
   bottom: 0;
   background-color: #f8f8f8;
   padding: 2px 0;
@@ -114,11 +115,11 @@
     </div>
 </div>
 
-<div class="sidebar bottom">
+<!-- <div class="footer">
   <img alt="Add-on logo" class="logo" width="27" height="27"
       src="http://irregardless.ly/assets/favicon.png">
   <span class="gray branding-text">Writing Tips by <a href="http://irregardless.ly" target="_blank">Irregardless</a></span>
-</div>
+</div> -->
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
 </script>
@@ -199,22 +200,41 @@
   function showTips(fullText, tips){
     hideAll();
     for (var i = 0; i < tips.length; i++) {
-      var tip = tips[i];
-      google.script.run
-        .withSuccessHandler(
-          function(snippet) {
-            var _tip = JSON.parse(JSON.stringify(tip));
-            _tip.text_snippet = snippet;
-            var html = tipToHtml(_tip);
-            $('.tips-list').append(html);
-          })
-        .withFailureHandler(
-          function(msg, element) {
-            showError();
-          })
-        .withUserObject(this)
-        .prepareSnippet(fullText, tip);
+      var tip = tips[i],
+          _tip = JSON.parse(JSON.stringify(tip));
+          _tip.text_snippet = prepareSnippet(fullText, tip);
+          var html = tipToHtml(_tip);
+          $('.tips-list').append(html);
     }
+  }
+
+  function prepareSnippet(fullText, tip){
+    //match will either be in the tip's `match_string`,
+    //or the tips `matched_string`
+    var match, snippet, indexOfM;
+    if(fullText.indexOf(tip.match_string) !== -1){
+      match = tip.match_string;
+    } else {
+      match = tip.matched_string;
+    }
+    //if text is short, snippet is the text
+    if(fullText.length < 100) {
+      snippet = fullText;
+    } else {
+      indexOfM = fullText.indexOf(match);
+      //match is in the first 50 characters
+      if(indexOfM < 50){
+        snippet = fullText.slice(0, 100) + "...";
+      //match is in the last 50 characters
+      } else if(fullText.length - indexOfM < 50) {
+        snippet = "..." + fullText.slice(fullText.length - 100, fullText.length);
+      //match is somewhere in the middle
+      } else {
+        snippet = "..." + fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
+      }
+    }
+
+    return snippet.replace(match, "<span class=\"match-content\">" + match +"</span>");
   }
 
 </script>

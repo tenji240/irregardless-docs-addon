@@ -17,35 +17,6 @@ function apiResponseToTips(resp){
   return tips;
 }
 
-function prepareSnippet(fullText, tip){
-  //match will either be in the tip's `match_string`,
-  //or the tips `matched_string`
-  var match, snippet, indexOfM;
-  if(fullText.indexOf(tip.match_string) !== -1){
-    match = tip.match_string;
-  } else {
-    match = tip.matched_string;
-  }
-  //if text is short, snippet is the text
-  if(fullText.length < 100) {
-    snippet = fullText;
-  } else {
-    indexOfM = fullText.indexOf(match);
-    //match is in the first 50 characters
-    if(indexOfM < 50){
-      snippet = fullText.slice(0, 100) + "...";
-    //match is in the last 50 characters
-    } else if(fullText.length - indexOfM < 50) {
-      snippet = "..." + fullText.slice(fullText.length - 100, fullText.length);
-    //match is somewhere in the middle
-    } else {
-      snippet = "..." + fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
-    }
-  }
-
-  return snippet.replace(match, "<span class=\"match-content\">" + match +"</span>");
-}
-
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
       .addItem('Start', 'showSidebar')
@@ -70,7 +41,7 @@ function getTips() {
   } else {
     var params = {
       contentType: 'application/json',
-      payload: JSON.stringify({body: text}),
+      payload: JSON.stringify({body: text, collection_id: 1}),
       method: "post",
     };
     var response = UrlFetchApp.fetch(MATCH_ENDPOINT, params),
@@ -78,13 +49,4 @@ function getTips() {
         tips = apiResponseToTips(JSON.parse(json));
     return {fullText: text, tips: tips};
   }
-}
-
-function getPreferences() {
-  var userProperties = PropertiesService.getUserProperties();
-  var languagePrefs = {
-    originLang: userProperties.getProperty('originLang'),
-    destLang: userProperties.getProperty('destLang')
-  };
-  return languagePrefs;
 }
