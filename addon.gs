@@ -2,6 +2,17 @@ var HOST = "http://irregardless.ly",
     MATCH_ENDPOINT = HOST + "/rules/match",
     GUIDES_ENDPOINT =  HOST + "/collections";
 
+function highlight(tip){
+  var body = DocumentApp.getActiveDocument().getBody(),
+      text = body.editAsText(),
+      range = body.findText(tip.match_string);
+  if(!range){
+    range = body.findText(tip.matched_string);
+  }
+  text.setBackgroundColor(range.getStartOffset(), range.getEndOffsetInclusive(), '#FFFF00');
+  return true;
+}
+
 function apiResponseToTips(resp){
   //nest creator attributes inside the tips array
   var tips = resp.data,

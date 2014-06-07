@@ -23,7 +23,9 @@ ul {
   padding-left: 0;
   text-align: center;
 }
-
+.sidebar {
+  position: static;
+}
 .notice {
   margin: 0 auto;
   padding-top: 30px;
@@ -101,7 +103,8 @@ ul {
 
 </style>
 
-<div class="sidebar">
+<div class="addon">
+  <div class="sidebar">
     <div id="no-results" class="notice">
         No results. <br /> Try a new search or switch the style guide.
     </div>
@@ -116,18 +119,32 @@ ul {
       <ul class="tips-list unstyled">
       </ul>
     </div>
-</div>
+  </div>
 
-<!-- <div class="footer">
-  <img alt="Add-on logo" class="logo" width="27" height="27"
-      src="http://irregardless.ly/assets/favicon.png">
-  <span class="gray branding-text">Writing Tips by <a href="http://irregardless.ly" target="_blank">Irregardless</a></span>
-</div> -->
+  <!-- <div class="footer">
+    <img alt="Add-on logo" class="logo" width="27" height="27"
+        src="http://irregardless.ly/assets/favicon.png">
+    <span class="gray branding-text">Writing Tips by <a href="http://irregardless.ly" target="_blank">Irregardless</a></span>
+  </div> -->
+</div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
 </script>
 
 <script>
+
+   function highlight(tip){
+      google.script.run
+          .withSuccessHandler(
+            function() {
+              console.log("success");
+            })
+          .withFailureHandler(
+            function() {
+              console.log("error");
+            })
+          .highlight(tip);
+   }
 
   //either build an <ul> or return Don't use
   function replacementHtml(tip){
@@ -189,6 +206,7 @@ ul {
   }
 
   function showError(){
+    $(".tips-list").empty();
     $loading.hide();
     $noResults.hide();
     $error.show();
@@ -221,6 +239,7 @@ ul {
           _tip = JSON.parse(JSON.stringify(tip));
           _tip.text_snippet = prepareSnippet(fullText, tip);
           var html = tipToHtml(_tip);
+           highlight(_tip);
           $('.tips-list').append(html);
     }
   }
