@@ -11,6 +11,11 @@
 .clearfix:after {
   clear: both
 }
+ul {
+  text-align: left;
+  padding-left: 20px;
+  list-style: initial;
+}
 .unstyled {
   list-style: none;
   padding-left: 0;
@@ -56,12 +61,15 @@
   border-bottom: 1px solid #d9d9d9;
 }
 .replacements {
-  float: left;
-  width: 50%;
+  width: 80%;
+  margin: 0 auto;
+}
+.replacements > span {
+  color: #6d6d6d;
 }
 .creator {
-  float: left;
-  width: 50%;
+  text-align: right;
+  padding-right: 10px;
 }
 .match-content {
   padding: 2px 4px;
@@ -77,10 +85,6 @@
 .explanation {
   text-align: left;
   margin: 8px 4px;
-}
-.creator > img {
-  max-width: 50px;
-  max-height: 50px;
 }
 .tips-list {
   margin-top: 0;
@@ -127,7 +131,7 @@
 <script>
 
   function tipToHtml(tip){
-    return "<li class=\"tip-container\">"+
+    var beginning = "<li class=\"tip-container\">"+
       "<div class=\"text-snippet\">"+
         tip.text_snippet +
       "</div>"+
@@ -140,15 +144,24 @@
         "</div>"+
         "<div class=\"replacements\">"+
           "<span>Instead Try:</span>"+
-          "<ul>"+
-          "</ul>"+
-        "</div>"+
-        "<div class=\"creator\">"+
-          "<img src=" + tip.creator_mugshot_url + ">"+
-            "<div>" + tip.creator_name + "</div>"+
-        "</div>"+
-      "</div>"+
-    "</li>";
+          "<ul>";
+
+      var replacements = "";
+      for(var i=0; i<tip.replacements.length; i++){
+        replacements += "<li>" + tip.replacements[i] + "</li>";
+      }
+
+      var end = "</ul>"+
+              "</div>"+
+              "<div class=\"creator\">"+
+                "<a href='http://irregardless.ly/#!/profile/" + tip.creator_id + "'>"+
+                  tip.creator_name+
+                "</a>"+
+              "</div>"+
+            "</div>"+
+          "</li>";
+
+    return beginning + replacements + end;
   }
 
   var $loading = $("#loading"),
