@@ -43,7 +43,7 @@ function prepareSnippet(fullText, tip){
     }
   }
 
-  return snippet.replace(match, "<span class=\"igc-match-content\">" + match +"</span>");
+  return snippet.replace(match, "<span class=\"match-content\">" + match +"</span>");
 }
 
 function onOpen(e) {

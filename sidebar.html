@@ -33,26 +33,68 @@
   display: none;
 }
 
-.col-contain {
-  overflow: hidden;
-}
-
-.col-one {
-  float: left;
-  width: 50%;
-}
-
 .logo {
   vertical-align: middle;
 }
 
-.radio-spacer {
-  height: 20px;
+.sidebar {
+  padding: 0 12px;
 }
 
-.width-100 {
-  width: 100%;
+.bottom {
+  position: fixed;
+  bottom: 0;
+  background-color: #f8f8f8;
+  padding: 2px 0;
+  border-top: 1px solid #aaa;
 }
+
+.tip-container {
+  max-height: auto;
+  padding: 15px 0;
+  border-bottom: 1px solid #d9d9d9;
+}
+.replacements {
+  float: left;
+  width: 50%;
+}
+.creator {
+  float: left;
+  width: 50%;
+}
+.match-content {
+  padding: 2px 4px;
+  border: solid 2px #da2020;
+  border-radius: 5px;
+  color: #da2020
+}
+.text-snippet {
+  color: #6d6d6d;
+  padding: 8px;
+  text-align: left;
+}
+.explanation {
+  text-align: left;
+  margin: 8px 4px;
+}
+.creator > img {
+  max-width: 50px;
+  max-height: 50px;
+}
+.tips-list {
+  margin-top: 0;
+}
+.match-string {
+  font-weight: bold;
+}
+.tip {
+  border-radius: 4px;
+  border: 1px dotted #f4b4b4;
+  padding: 10px 5px;
+  margin: 4px 8px;
+  background-color: #f8f8f8;
+}
+
 </style>
 
 <div class="sidebar">
@@ -79,8 +121,6 @@
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
-</script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js">
 </script>
 
 <script>
