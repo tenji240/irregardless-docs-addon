@@ -7,9 +7,11 @@
   content: " ";
   display: table;
 }
-
 .clearfix:after {
   clear: both
+}
+.muted {
+  color: #6d6d6d;
 }
 ul {
   text-align: left;
@@ -64,9 +66,6 @@ ul {
   width: 80%;
   margin: 0 auto;
 }
-.replacements > span {
-  color: #6d6d6d;
-}
 .creator {
   text-align: right;
   padding-right: 10px;
@@ -84,7 +83,7 @@ ul {
 }
 .explanation {
   text-align: left;
-  margin: 4px;
+  margin: 8px 4px;
 }
 .tips-list {
   margin-top: 0;
@@ -95,7 +94,7 @@ ul {
 .tip {
   border-radius: 4px;
   border: 1px dotted #f4b4b4;
-  padding: 5px;
+  padding: 10px 5px;
   margin: 4px 8px;
   background-color: #f8f8f8;
 }
@@ -130,6 +129,21 @@ ul {
 
 <script>
 
+  //either build an <ul> or return Don't use
+  function replacementHtml(tip){
+    var html = "<div class=\"replacements\">";
+    if(tip.replacements && tip.replacements.length){
+      html += "<span class=\"muted\">Instead Try:</span><ul>";
+      for(var i=0; i<tip.replacements.length; i++){
+        html += "<li>" + tip.replacements[i] + "</li>";
+      }
+      html += "</ul>";
+    } else {
+     html += "<span class=\"muted\"> Don't Use </span>";
+    }
+    return html + "</div>";
+  }
+
   function tipToHtml(tip){
     var beginning = "<li class=\"tip-container\">"+
       "<div class=\"text-snippet\">"+
@@ -141,27 +155,17 @@ ul {
         "</div>"+
         "<div class=\"explanation\">"+
           tip.explanation +
-        "</div>"+
-        "<div class=\"replacements\">"+
-          "<span>Instead Try:</span>"+
-          "<ul>";
+        "</div>";
 
-      var replacements = "";
-      for(var i=0; i<tip.replacements.length; i++){
-        replacements += "<li>" + tip.replacements[i] + "</li>";
-      }
-
-      var end = "</ul>"+
-              "</div>"+
-              "<div class=\"creator\">"+
-                "<a href='http://irregardless.ly/#!/profile/" + tip.creator_id + "'>"+
+      var end = "</div>"+
+                "<div class=\"creator\">"+
+                "<a href='http://irregardless.ly/#!/profile/" + tip.creator_id + "' target='_blank'>"+
                   tip.creator_name+
                 "</a>"+
-              "</div>"+
             "</div>"+
           "</li>";
 
-    return beginning + replacements + end;
+    return beginning + replacementHtml(tip) + end;
   }
 
   var $loading = $("#loading"),
