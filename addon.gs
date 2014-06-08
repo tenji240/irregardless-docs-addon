@@ -48,7 +48,7 @@ function showSidebar() {
 function getTips() {
   var text = DocumentApp.getActiveDocument().getBody().getText();
   if (text.length == 0) {
-
+    return {error: "noText"};
   } else {
     var params = {
       contentType: 'application/json',

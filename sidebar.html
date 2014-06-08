@@ -27,6 +27,7 @@ ul {
   position: static;
 }
 .notice {
+  display: none;
   margin: 0 auto;
   padding-top: 30px;
   text-align: center;
@@ -105,15 +106,7 @@ ul {
 
 <div class="addon">
   <div class="sidebar">
-    <div id="no-results" class="notice">
-        No results. <br /> Try a new search or switch the style guide.
-    </div>
-    <div id="error" class="notice">
-        Oops! Something went wrong.<br />
-        Please refresh and try again
-    </div>
-    <div id="loading" class="notice">
-        Loading...
+    <div id="notice" class="notice">
     </div>
     <div class="tips-container">
       <ul class="tips-list unstyled">
@@ -185,44 +178,39 @@ ul {
     return beginning + replacementHtml(tip) + end;
   }
 
-  var $loading = $("#loading"),
-      $noResults = $("#no-results"),
-      $error = $("#error");
+  var $notice = $("#notice");
 
   $(function() {
     getTips();
   });
 
   function showLoading(){
-    $loading.show();
-    $noResults.hide();
-    $error.hide();
+    $notice.html("Loading...").show();
   }
 
   function showNoResults(){
-    $loading.hide();
-    $noResults.show();
-    $error.hide();
+    $notice.html("No results. <br /> Your writing looks good!").show();
   }
 
   function showError(){
     $(".tips-list").empty();
-    $loading.hide();
-    $noResults.hide();
-    $error.show();
+    $notice.html("Oops! Something went wrong.<br />Please refresh and try again").show();
   }
 
-  function hideAll(){
-    $loading.hide();
-    $noResults.hide();
-    $error.hide();
+  function showNoText(){
+    $notice.html("Looks like you don't have any writing in your document.").show();
   }
 
   function getTips(){
+    showLoading()
     google.script.run
         .withSuccessHandler(
-          function(params) {
-            showTips(params.fullText, params.tips);
+          function(resp) {
+            if(resp.error === "noText"){
+              showNoText();
+            } else {
+              showTips(resp.fullText, resp.tips);
+            }
           })
         .withFailureHandler(
           function(msg, element) {
@@ -233,14 +221,18 @@ ul {
   }
 
   function showTips(fullText, tips){
-    hideAll();
-    for (var i = 0; i < tips.length; i++) {
-      var tip = tips[i],
-          _tip = JSON.parse(JSON.stringify(tip));
-          _tip.text_snippet = prepareSnippet(fullText, tip);
-          var html = tipToHtml(_tip);
-           highlight(_tip);
-          $('.tips-list').append(html);
+    $notice.hide();
+    if(tips.length){
+      for (var i = 0; i < tips.length; i++) {
+        var tip = tips[i],
+            _tip = JSON.parse(JSON.stringify(tip));
+            _tip.text_snippet = prepareSnippet(fullText, tip);
+            var html = tipToHtml(_tip);
+             highlight(_tip);
+            $('.tips-list').append(html);
+      }
+    } else {
+      showNoResults()
     }
   }
 
