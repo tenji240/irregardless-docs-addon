@@ -38,8 +38,8 @@ function saveGuide(guideId){
 
 function getGuides(){
   var response = UrlFetchApp.fetch(GUIDES_ENDPOINT),
-    json = response.getContentText(),
-    userStore = PropertiesService.getUserProperties();
+      json = response.getContentText(),
+      userStore = PropertiesService.getUserProperties();
 
   userStore.setProperty('all_guides', JSON.stringify(JSON.parse(json).data));
 

@@ -27,6 +27,7 @@
     margin-bottom: 12px;
     max-height: 200px;
     overflow-y: scroll;
+    border: 1px solid #aaa;
   }
   .settings-trigger {
     display: none;
@@ -172,6 +173,7 @@
 
     var $notice = $("#notice"),
         $styleGuideList = $(".styleguide-list"),
+        $settings = $('.settings'),
         $settingsTrigger = $("#settings-trigger"),
         $currentGuide = $("#current-styleguide");
 
@@ -179,7 +181,6 @@
       getTips();
       getGuides();
       $("[data-toggle-settings]").on("click", function(){
-        var $settings = $('.settings');
         if($settings.is(":visible")){
           $settings.hide();
         } else {
@@ -196,7 +197,7 @@
       google.script.run
           .withSuccessHandler(
             function(resp) {
-              $styleGuideList.hide();
+              $settings.hide();
               renderGuides(resp);
             })
           .withFailureHandler(
