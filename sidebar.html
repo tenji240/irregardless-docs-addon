@@ -172,6 +172,7 @@
 <script>
 
     var $notice = $("#notice"),
+        $tipsList = $('.tips-list'),
         $styleGuideList = $(".styleguide-list"),
         $settings = $('.settings'),
         $settingsTrigger = $("#settings-trigger"),
@@ -199,6 +200,7 @@
             function(resp) {
               $settings.hide();
               renderGuides(resp);
+              getTips();
             })
           .withFailureHandler(
             function() {
@@ -335,14 +337,17 @@
 
   function showTips(fullText, tips){
     $notice.hide();
+    $tipsList.empty();
     if(tips.length){
       for (var i = 0; i < tips.length; i++) {
         var tip = tips[i],
+            //`tip` is immuteable, make a muteable copy to add
+            //the property `text_snippet` to
             _tip = JSON.parse(JSON.stringify(tip));
             _tip.text_snippet = prepareSnippet(fullText, tip);
             var html = tipToHtml(_tip);
-             highlight(_tip);
-            $('.tips-list').append(html);
+            highlight(_tip);
+            $tipsList.append(html);
       }
     } else {
       showNoResults()

@@ -65,13 +65,15 @@ function showSidebar() {
 }
 
 function getTips() {
-  var text = DocumentApp.getActiveDocument().getBody().getText();
+  var text = DocumentApp.getActiveDocument().getBody().getText(),
+      collectionId = PropertiesService.getUserProperties().getProperty('style_guide_id');
+
   if (text.length === 0) {
     return {error: "noText"};
   } else {
     var params = {
       contentType: 'application/json',
-      payload: JSON.stringify({body: text, collection_id: 1}),
+      payload: JSON.stringify({body: text, collection_id: Number(collectionId)}),
       method: "post",
     };
     var response = UrlFetchApp.fetch(MATCH_ENDPOINT, params),
