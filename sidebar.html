@@ -28,6 +28,7 @@
   }
   .styleguide-list {
     list-style: none;
+    text-align: left;
     cursor: pointer;
     width: 200px;
     color: #6d6d6d;
@@ -168,35 +169,52 @@
           $settings.show();
         }
       });
+
+      $styleGuideList.on("click", "[data-save-guide-id]", function(){
+        saveGuide($(this).data("save-guide-id"));
+      });
     });
+
+  function saveGuide(guideId){
+      google.script.run
+          .withSuccessHandler(
+            function(resp) {
+              renderGuides(resp);
+            })
+          .withFailureHandler(
+            function() {
+              showError();
+            })
+          .saveGuide(guideId);
+  }
 
    function getGuides(){
       google.script.run
           .withSuccessHandler(
             function(resp) {
               renderGuides(resp);
-              console.log("success");
             })
           .withFailureHandler(
             function() {
-              console.log("error");
+              showError();
             })
-          .getGuides(tip);
+          .getGuides();
    }
 
    function highlight(tip){
       google.script.run
           .withSuccessHandler(
             function() {
-              console.log("success");
+              //
             })
           .withFailureHandler(
             function() {
-              console.log("error");
+              showError();
             })
           .highlight(tip);
    }
 
+   //expects resp.guides and resp.chosenGuideId
    function renderGuides(resp){
      var guides = resp.guides,
          selectedGuideId = resp.chosenGuideId || 1, //1 is the "Everything" guide.

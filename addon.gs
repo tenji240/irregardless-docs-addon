@@ -28,12 +28,23 @@ function apiResponseToTips(resp){
   return tips;
 }
 
+function saveGuide(guideId){
+  userStore = PropertiesService.getUserProperties();
+  userStore.setProperty('style_guide_id', guideId);
+
+  return {guides: JSON.parse(userStore.getProperty('all_guides')),
+          chosenGuideId: Number(userStore.getProperty('style_guide_id'))};
+}
+
 function getGuides(){
   var response = UrlFetchApp.fetch(GUIDES_ENDPOINT),
     json = response.getContentText(),
     userStore = PropertiesService.getUserProperties();
 
-  return {guides: JSON.parse(json).data, chosenGuideId: userStore.getProperty('style_guide_id')};
+  userStore.setProperty('all_guides', JSON.stringify(JSON.parse(json).data));
+
+  return {guides: JSON.parse(userStore.getProperty('all_guides')),
+          chosenGuideId: Number(userStore.getProperty('style_guide_id'))};
 }
 
 function onOpen(e) {
