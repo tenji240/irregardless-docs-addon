@@ -2,110 +2,141 @@
 <!-- The CSS package above applies Google styling to buttons and other elements. -->
 
 <style>
-
-.clearfix:before, .clearfix:after{
-  content: " ";
-  display: table;
-}
-.clearfix:after {
-  clear: both
-}
-.muted {
-  color: #6d6d6d;
-}
-ul {
-  text-align: left;
-  padding-left: 20px;
-  list-style: initial;
-}
-.unstyled {
-  list-style: none;
-  padding-left: 0;
-  text-align: center;
-}
-.sidebar {
-  position: static;
-}
-.notice {
-  display: none;
-  margin: 0 auto;
-  padding-top: 30px;
-  text-align: center;
-  font-size: 1.2em;
-  color: #aaa;
-}
-
-#error {
-  display: none;
-}
-
-#no-results {
-  display: none;
-}
-
-.logo {
-  vertical-align: middle;
-}
-
-.sidebar {
-  padding: 0 12px;
-}
-
-.footer {
-  position: fixed;
-  width: 100%;
-  bottom: 0;
-  background-color: #f8f8f8;
-  padding: 2px 0;
-  border-top: 1px solid #aaa;
-}
-
-.tip-container {
-  max-height: auto;
-  padding: 15px 0;
-  border-bottom: 1px solid #d9d9d9;
-}
-.replacements {
-  width: 80%;
-  margin: 0 auto;
-}
-.creator {
-  text-align: right;
-  padding-right: 10px;
-}
-.match-content {
-  padding: 2px 4px;
-  border: solid 2px #da2020;
-  border-radius: 5px;
-  color: #da2020
-}
-.text-snippet {
-  color: #6d6d6d;
-  padding: 8px;
-  text-align: left;
-}
-.explanation {
-  text-align: left;
-  margin: 8px 4px;
-}
-.tips-list {
-  margin-top: 0;
-}
-.match-string {
-  font-weight: bold;
-}
-.tip {
-  border-radius: 4px;
-  border: 1px dotted #f4b4b4;
-  padding: 10px 5px;
-  margin: 4px 8px;
-  background-color: #f8f8f8;
-}
-
+  .clearfix:before, .clearfix:after{
+    content: " ";
+    display: table;
+  }
+  .clearfix:after {
+    clear: both
+  }
+  .muted {
+    color: #6d6d6d;
+  }
+  ul {
+    text-align: left;
+    padding-left: 20px;
+    list-style: initial;
+  }
+  .unstyled {
+    list-style: none;
+    padding-left: 0;
+    text-align: center;
+  }
+  .settings {
+    display: none;
+    margin-bottom: 12px;
+  }
+  .styleguide-list {
+    list-style: none;
+    cursor: pointer;
+    width: 200px;
+    color: #6d6d6d;
+    padding: 0;
+    margin: 0;
+  }
+  .styleguide-list > li {
+    padding: 8px 0 8px 6px;
+    border: 1px dotted #f4b4b4;
+  }
+  .chosen-guide {
+    background-color: #da2020;
+    color: #f8f8f8;
+  }
+  .styleguide-list > li:hover {
+    background-color: #da2020;
+    color: #f8f8f8;
+  }
+  .sidebar {
+    position: static;
+  }
+  .notice {
+    display: none;
+    margin: 0 auto;
+    padding-top: 30px;
+    text-align: center;
+    font-size: 1.2em;
+    color: #aaa;
+  }
+  #error {
+    display: none;
+  }
+  #no-results {
+    display: none;
+  }
+  .logo {
+    vertical-align: middle;
+  }
+  .sidebar {
+    padding: 0;
+  }
+  .footer {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    background-color: #f8f8f8;
+    padding: 2px 0;
+    border-top: 1px solid #aaa;
+  }
+  .tips-container {
+    padding: 0 12px;
+  }
+  .tip-container {
+    max-height: auto;
+    padding: 15px 0;
+    border-bottom: 1px solid #d9d9d9;
+  }
+  .replacements {
+    width: 80%;
+    margin: 0 auto;
+  }
+  .creator {
+    text-align: right;
+    padding-right: 10px;
+  }
+  .match-content {
+    padding: 2px 4px;
+    border: solid 2px #da2020;
+    border-radius: 5px;
+    color: #da2020
+  }
+  .text-snippet {
+    color: #6d6d6d;
+    padding: 8px;
+    text-align: left;
+  }
+  .explanation {
+    text-align: left;
+    margin: 8px 4px;
+  }
+  .tips-list {
+    margin-top: 0;
+  }
+  .match-string {
+    font-weight: bold;
+  }
+  .tip {
+    border-radius: 4px;
+    border: 1px dotted #f4b4b4;
+    padding: 10px 5px;
+    margin: 4px 8px;
+    background-color: #f8f8f8;
+  }
 </style>
 
 <div class="addon">
   <div class="sidebar">
+    <div class="settings-trigger" data-toggle-settings>
+      settings
+    </div>
+    <div class="settings">
+      <ul class="unstyled styleguide-list">
+        <li class="chosen-guide">Everything</li>
+        <li>Jared is Mad</li>
+        <li>Legal Writing</li>
+      </ul>
+      <div class="spinner">
+      </div>
+    </div>
     <div id="notice" class="notice">
     </div>
     <div class="tips-container">
@@ -125,6 +156,18 @@ ul {
 </script>
 
 <script>
+
+    $(function() {
+      getTips();
+      $("[data-toggle-settings]").on("click", function(){
+        var $settings = $('.settings');
+        if($settings.is(":visible")){
+          $settings.hide();
+        } else {
+          $settings.show();
+        }
+      });
+    });
 
    function highlight(tip){
       google.script.run
@@ -179,10 +222,6 @@ ul {
   }
 
   var $notice = $("#notice");
-
-  $(function() {
-    getTips();
-  });
 
   function showLoading(){
     $notice.html("Loading...").show();
