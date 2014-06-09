@@ -25,12 +25,22 @@
   .settings {
     display: none;
     margin-bottom: 12px;
+    max-height: 200px;
+    overflow-y: scroll;
+  }
+  .settings-trigger {
+    display: none;
+    padding: 8px 6px;
+    text-align: right;
+    cursor: pointer;
+  }
+  .current-styleguide {
+    text-decoration: underline;
   }
   .styleguide-list {
     list-style: none;
     text-align: left;
     cursor: pointer;
-    width: 200px;
     color: #6d6d6d;
     padding: 0;
     margin: 0;
@@ -83,8 +93,11 @@
   }
   .tip-container {
     max-height: auto;
-    padding: 15px 0;
     border-bottom: 1px solid #d9d9d9;
+    padding: 15px 0;
+  }
+  .tip-container:first-child {
+    padding-top: 0;
   }
   .replacements {
     width: 80%;
@@ -126,9 +139,11 @@
 
 <div class="addon">
   <div class="sidebar">
-    <div class="settings-trigger" data-toggle-settings>
-      settings
-    </div>
+    
+      <div id="settings-trigger" class="settings-trigger" data-toggle-settings>
+        <span class="muted">current styleguide: </span>
+        <span id="current-styleguide" class="current-styleguide"></span>
+      </div>
     <div class="settings">
       <ul class="unstyled styleguide-list">
       </ul>
@@ -156,7 +171,9 @@
 <script>
 
     var $notice = $("#notice"),
-        $styleGuideList = $(".styleguide-list");
+        $styleGuideList = $(".styleguide-list"),
+        $settingsTrigger = $("#settings-trigger"),
+        $currentGuide = $("#current-styleguide");
 
     $(function() {
       getTips();
@@ -179,6 +196,7 @@
       google.script.run
           .withSuccessHandler(
             function(resp) {
+              $styleGuideList.hide();
               renderGuides(resp);
             })
           .withFailureHandler(
@@ -229,6 +247,8 @@
                     guide.id + "><span class=\"check\">&#x2713;</span> " +
                     guide.name +
                   "</li>";
+         $currentGuide.html(guide.name);
+         $settingsTrigger.show();
        } else {
          html = "<li data-save-guide-id=" + guide.id + ">" +  guide.name + "</li>";
          $styleGuideList.append(html);
