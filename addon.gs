@@ -28,6 +28,14 @@ function apiResponseToTips(resp){
   return tips;
 }
 
+function getGuides(){
+  var response = UrlFetchApp.fetch(GUIDES_ENDPOINT),
+    json = response.getContentText(),
+    userStore = PropertiesService.getUserProperties();
+
+  return {guides: JSON.parse(json).data, chosenGuideId: userStore.getProperty('style_guide_id')};
+}
+
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
       .addItem('Start', 'showSidebar')
@@ -47,7 +55,7 @@ function showSidebar() {
 
 function getTips() {
   var text = DocumentApp.getActiveDocument().getBody().getText();
-  if (text.length == 0) {
+  if (text.length === 0) {
     return {error: "noText"};
   } else {
     var params = {
@@ -56,8 +64,9 @@ function getTips() {
       method: "post",
     };
     var response = UrlFetchApp.fetch(MATCH_ENDPOINT, params),
-        json = response.getContentText(),
-        tips = apiResponseToTips(JSON.parse(json));
-    return {fullText: text, tips: tips};
+        json = response.getContentText();
+
+    return { fullText: text,
+             tips: apiResponseToTips(JSON.parse(json))};
   }
 }

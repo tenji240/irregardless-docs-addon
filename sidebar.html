@@ -130,9 +130,6 @@
     </div>
     <div class="settings">
       <ul class="unstyled styleguide-list">
-        <li class="chosen-guide">Everything</li>
-        <li>Jared is Mad</li>
-        <li>Legal Writing</li>
       </ul>
       <div class="spinner">
       </div>
@@ -157,8 +154,12 @@
 
 <script>
 
+    var $notice = $("#notice"),
+        $styleGuideList = $(".styleguide-list");
+
     $(function() {
       getTips();
+      getGuides();
       $("[data-toggle-settings]").on("click", function(){
         var $settings = $('.settings');
         if($settings.is(":visible")){
@@ -168,6 +169,20 @@
         }
       });
     });
+
+   function getGuides(){
+      google.script.run
+          .withSuccessHandler(
+            function(resp) {
+              renderGuides(resp);
+              console.log("success");
+            })
+          .withFailureHandler(
+            function() {
+              console.log("error");
+            })
+          .getGuides(tip);
+   }
 
    function highlight(tip){
       google.script.run
@@ -180,6 +195,28 @@
               console.log("error");
             })
           .highlight(tip);
+   }
+
+   function renderGuides(resp){
+     var guides = resp.guides,
+         selectedGuideId = resp.chosenGuideId || 1, //1 is the "Everything" guide.
+         chosenGuideHtml;
+
+     $styleGuideList.empty();
+     for(var i=0; i<guides.length; i++){
+       var guide = guides[i],
+           html;
+       if(guide.id === selectedGuideId){
+         chosenGuideHtml = "<li class=\"chosen-guide\" data-save-guide-id=" +
+                    guide.id + "><span class=\"check\">&#x2713;</span> " +
+                    guide.name +
+                  "</li>";
+       } else {
+         html = "<li data-save-guide-id=" + guide.id + ">" +  guide.name + "</li>";
+         $styleGuideList.append(html);
+       }
+     }
+     $styleGuideList.prepend(chosenGuideHtml);
    }
 
   //either build an <ul> or return Don't use
@@ -220,8 +257,6 @@
 
     return beginning + replacementHtml(tip) + end;
   }
-
-  var $notice = $("#notice");
 
   function showLoading(){
     $notice.html("Loading...").show();
