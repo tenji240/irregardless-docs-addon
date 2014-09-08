@@ -136,6 +136,18 @@
     margin: 4px 8px;
     background-color: #f8f8f8;
   }
+  .creator {
+    float: left;
+    width: 40px;
+  }
+  .creator img {
+    max-width: 40px;
+    max-height: 40px;
+  }
+  .creator p {
+    margin: 0;
+    text-align: center;
+  }
 </style>
 
 <div class="addon">
@@ -277,6 +289,12 @@
 
   function tipToHtml(tip){
     var beginning = "<li class=\"tip-container\">"+
+      "<div class=\"creator\">"+
+        "<a href='http://irregardless.ly/#!/profile/" + tip.creator.id + "' target='_blank'>"+
+          "<img src=\""+ tip.creator.mugshot_url+"\"/>"+
+          "<p>" + tip.creator.name.split(' ')[0] + "</p>" +
+        "</a>"+
+      "</div>"+
       "<div class=\"text-snippet\">"+
         tip.text_snippet +
       "</div>"+
@@ -289,11 +307,6 @@
         "</div>";
 
       var end = "</div>"+
-                "<div class=\"creator\">"+
-                "<a href='http://irregardless.ly/#!/profile/" + tip.creator.id + "' target='_blank'>"+
-                  tip.creator.name+
-                "</a>"+
-            "</div>"+
           "</li>";
 
     return beginning + replacementHtml(tip) + end;
