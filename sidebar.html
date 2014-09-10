@@ -2,6 +2,9 @@
 <!-- The CSS package above applies Google styling to buttons and other elements. -->
 
 <style>
+  *:active, *:focus {
+    outline: none;
+  }
   .clearfix:before, .clearfix:after{
     content: " ";
     display: table;
@@ -22,21 +25,79 @@
     padding-left: 0;
     text-align: center;
   }
+  
+  .sidebar {
+    padding: 0;
+    position: static;
+  }
+  
+  #cover-bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    background: rgba(36, 31, 31, 0.75);
+    display: none;
+    -moz-opacity: 0;
+    -khtml-opacity: 0;
+    opacity: 0;
+    -moz-transition: all .5s ease;
+    -webkit-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    -ms-transition: all .5s ease;
+    transition: all .5s ease;
+  }
+  #cover-bg.showing {
+    -moz-opacity: 1;
+    -khtml-opacity: 1;
+    opacity: 1;
+  }
+  
   .settings {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    top: 34px;
+    z-index: 100;
     display: none;
     margin-bottom: 12px;
+    overflow: hidden;
+    border-bottom: 1px solid #aaa;
+    border-top: 1px solid #aaa;
+    background: #f8f8f8;
+    -moz-transition: all .5s ease;
+    -webkit-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    -ms-transition: all .5s ease;
+    transition: all .5s ease;
+    max-height:0px;
+  }
+  .settings.showing {
     max-height: 200px;
     overflow-y: scroll;
-    border: 1px solid #aaa;
   }
   .settings-trigger {
+    position: relative;
+    z-index: 100;
     display: none;
-    padding: 8px 6px;
+    padding: 9px 8px 7px;
+    background: #fcfcfc;
     text-align: right;
     cursor: pointer;
+    border-bottom: 1px solid #ddd;
+    text-transform: capitalize;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .settings-trigger:hover {
+    background: #fefefe;
   }
   .current-styleguide {
-    text-decoration: underline;
+    color: #474747;
+    font-weight: bold;
   }
   .styleguide-list {
     list-style: none;
@@ -47,20 +108,26 @@
     margin: 0;
   }
   .styleguide-list > li {
-    padding: 8px 0 8px 6px;
-    border: 1px dotted #f4b4b4;
+    position: relative;
+    padding: 10px 20px 10px 10px;
+    border-bottom: 1px solid #eee;
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
   }
   .chosen-guide {
-    background-color: #da2020;
+    background-color: #E56B6B;
     color: #f8f8f8;
+  }
+  .chosen-guide .check {
+    position: absolute;
+    right: 10px;
+    top: 10px;
   }
   .styleguide-list > li:hover {
-    background-color: #da2020;
+    background-color: #E56B6B;
     color: #f8f8f8;
   }
-  .sidebar {
-    position: static;
-  }
+  
   .notice {
     display: none;
     margin: 0 auto;
@@ -78,9 +145,6 @@
   .logo {
     vertical-align: middle;
   }
-  .sidebar {
-    padding: 0;
-  }
   .footer {
     position: fixed;
     width: 100%;
@@ -90,59 +154,115 @@
     border-top: 1px solid #aaa;
   }
   .tips-container {
-    padding: 0 12px;
+    position: relative;
+    z-index: 1;
   }
   .tip-container {
-    max-height: auto;
-    border-bottom: 1px solid #d9d9d9;
-    padding: 15px 0;
+    position: relative;
+    border-bottom: 1px solid #ccc;
+    padding: 20px;
+    background: #FDFAFA;
+    -moz-box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.02);
+    -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.02);
+    -o-box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.02);
+    -ms-box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.02);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.02);
   }
-  .tip-container:first-child {
-    padding-top: 0;
+  .tip-container:nth-child(even) {
+    background: #fdfdfd;
+  }
+  .tip-border {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 0;
+    margin-left: 0;
+    border-style: solid;
+    border-width: 10px 10px 0 0;
+    border-color: #F26262 transparent transparent transparent;
   }
   .replacements {
-    width: 80%;
-    margin: 0 auto;
+    text-align:left;
   }
-  .creator {
-    text-align: right;
-    padding-right: 10px;
+  .replacements-label {
+    color: #F26262;
+    display: inline-block;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+  .replacements ul {
+    color: #464141;
+    list-style: none;
+    padding-left: 0;
+  }
+  .replacements li {
+    position: relative;
+    padding-left: 10px;
+  }
+  .replacements li:before {
+    position: absolute;
+    left: 0;
+    top: 0;
+    content: "• ";
+    color: #d1d1d1;
+    -moz-box-shadow: 0 1px 0 rgba(255,255,255,.3);
+    -webkit-box-shadow: 0 1px 0 rgba(255,255,255,.3);
+    -o-box-shadow: 0 1px 0 rgba(255,255,255,.3);
+    -ms-box-shadow: 0 1px 0 rgba(255,255,255,.3);
+    box-shadow: 0 1px 0 rgba(255,255,255,.3);
   }
   .match-content {
-    padding: 2px 4px;
-    border: solid 2px #da2020;
-    border-radius: 5px;
-    color: #da2020
+    padding: 2px 0px;
+    border-bottom: solid 2px #da2020;
+    color: #da2020;
   }
   .text-snippet {
-    color: #6d6d6d;
-    padding: 8px;
+    padding-right: 50px;
+    margin-bottom: 15px;
     text-align: left;
+    color: #6F6E6E;
+    min-height: 35px;
+    font-size: 14px;
   }
   .explanation {
     text-align: left;
-    margin: 8px 4px;
+    padding: 10px;
+    background: white;
+    margin-top: 10px;
+    color: #776D6D;
+    border: 1px dotted #ccc;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
   }
   .tips-list {
+    position: relative;
+    z-index: 1;
     margin-top: 0;
+    margin-bottom: 0;
   }
   .match-string {
     font-weight: bold;
   }
   .tip {
-    border-radius: 4px;
-    border: 1px dotted #f4b4b4;
-    padding: 10px 5px;
-    margin: 4px 8px;
-    background-color: #f8f8f8;
+    
   }
   .creator {
-    float: left;
+    position: absolute;
     width: 40px;
+    right: 0;
+    top: 0;
+    padding: 0;
   }
   .creator img {
-    max-width: 40px;
-    max-height: 40px;
+    width: 35px;
+    height: 35px;
+    -moz-box-shadow: -1px 1px 1px rgba(0 , 0 , 0 , 0.3);
+    -webkit-box-shadow: -1px 1px 1px rgba(0 , 0 , 0 , 0.3);
+    -o-box-shadow: -1px 1px 1px rgba(0 , 0 , 0 , 0.3);
+    -ms-box-shadow: -1px 1px 1px rgba(0 , 0 , 0 , 0.3);
+    box-shadow: -1px 1px 1px rgba(0 , 0 , 0 , 0.3);
   }
   .creator p {
     margin: 0;
@@ -168,6 +288,8 @@
     <div class="tips-container">
       <ul class="tips-list unstyled">
       </ul>
+      <div id="cover-bg">
+      </div>
     </div>
   </div>
 
@@ -188,16 +310,27 @@
         $styleGuideList = $(".styleguide-list"),
         $settings = $('.settings'),
         $settingsTrigger = $("#settings-trigger"),
-        $currentGuide = $("#current-styleguide");
+        $currentGuide = $("#current-styleguide"),
+        $coverBG = $('#cover-bg');
 
     $(function() {
       getTips();
       getGuides();
       $("[data-toggle-settings]").on("click", function(){
         if($settings.is(":visible")){
-          $settings.hide();
+          $settings.removeClass('showing');
+          $coverBG.removeClass('showing');
+          setTimeout(function(){
+            $settings.hide();
+            $coverBG.hide();
+          },500);
         } else {
           $settings.show();
+          $coverBG.show();
+          setTimeout(function(){
+            $settings.addClass('showing');
+            $coverBG.addClass('showing');
+          },0);
         }
       });
 
@@ -276,13 +409,13 @@
   function replacementHtml(tip){
     var html = "<div class=\"replacements\">";
     if(tip.replacements && tip.replacements.length){
-      html += "<span class=\"muted\">Instead Try:</span><ul>";
+      html += "<div class=\"muted replacements-label\">Instead Try:</div><ul>";
       for(var i=0; i<tip.replacements.length; i++){
         html += "<li>" + tip.replacements[i] + "</li>";
       }
       html += "</ul>";
     } else {
-     html += "<span class=\"muted\"> Don't Use </span>";
+     html += "<div class=\"muted replacements-label\"> Don't Use </div>";
     }
     return html + "</div>";
   }
@@ -291,25 +424,26 @@
     var beginning = "<li class=\"tip-container\">"+
       "<div class=\"creator\">"+
         "<a href='http://irregardless.ly/#!/profile/" + tip.creator.id + "' target='_blank'>"+
-          "<img src=\""+ tip.creator.mugshot_url+"\"/>"+
-          "<p>" + tip.creator.name.split(' ')[0] + "</p>" +
+          "<img src=\""+ tip.creator.mugshot_url+"\" title=\""+ tip.creator.name.split(' ')[0] + "\" alt=\""+ tip.creator.name.split(' ')[0] + "\" />"+
         "</a>"+
       "</div>"+
       "<div class=\"text-snippet\">"+
         tip.text_snippet +
       "</div>"+
       "<div class=\"tip clearfix\">"+
-        "<div class=\"match-string\">"+
-          tip.matched_string +
-        "</div>"+
+        replacementHtml(tip) +
+        // "<div class=\"match-string\">"+
+        //  tip.matched_string +
+        // "</div>"+
         "<div class=\"explanation\">"+
           tip.explanation +
-        "</div>";
+        "</div>" +
+        "<div class='tip-border'></div>";
 
       var end = "</div>"+
           "</li>";
 
-    return beginning + replacementHtml(tip) + end;
+    return beginning + end;
   }
 
   function showLoading(){
@@ -386,10 +520,10 @@
         snippet = fullText.slice(0, 100) + "...";
       //match is in the last 50 characters
       } else if(fullText.length - indexOfM < 50) {
-        snippet = "..." + fullText.slice(fullText.length - 100, fullText.length);
+        snippet = fullText.slice(fullText.length - 100, fullText.length);
       //match is somewhere in the middle
       } else {
-        snippet = "..." + fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
+        snippet = fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
       }
     }
 
