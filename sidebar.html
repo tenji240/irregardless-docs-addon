@@ -25,12 +25,10 @@
     padding-left: 0;
     text-align: center;
   }
-  
   .sidebar {
     padding: 0;
     position: static;
   }
-  
   #cover-bg {
     position: absolute;
     left: 0;
@@ -54,7 +52,6 @@
     -khtml-opacity: 1;
     opacity: 1;
   }
-  
   .settings {
     position: absolute;
     left: 0;
@@ -127,7 +124,6 @@
     background-color: #E56B6B;
     color: #f8f8f8;
   }
-  
   .notice {
     display: none;
     margin: 0 auto;
@@ -246,7 +242,6 @@
     font-weight: bold;
   }
   .tip {
-    
   }
   .creator {
     position: absolute;
@@ -272,7 +267,6 @@
 
 <div class="addon">
   <div class="sidebar">
-    
       <div id="settings-trigger" class="settings-trigger" data-toggle-settings>
         <span class="muted">current styleguide: </span>
         <span id="current-styleguide" class="current-styleguide"></span>
@@ -316,6 +310,15 @@
     $(function() {
       getTips();
       getGuides();
+      $(document).on("click", ".apply-link", function(evt){
+        var tip = $(this).closest(".tip-container").data('tipObject');
+        applyTip(tip, $(this).data('replacement'));
+        evt.stopPropagation();
+      });
+      $(document).on("click", ".tip-container", function(){
+        var tip = $(this).data('tipObject');
+        highlight(tip);
+      });
       $("[data-toggle-settings]").on("click", function(){
         if($settings.is(":visible")){
           $settings.removeClass('showing');
@@ -380,6 +383,19 @@
           .highlight(tip);
    }
 
+   function applyTip(tip, replace){
+     google.script.run
+          .withSuccessHandler(
+            function() {
+              //
+            })
+          .withFailureHandler(
+            function() {
+              showError();
+            })
+          .applyTip(tip, replace);
+   }
+
    //expects resp.guides and resp.chosenGuideId
    function renderGuides(resp){
      var guides = resp.guides,
@@ -411,7 +427,7 @@
     if(tip.replacements && tip.replacements.length){
       html += "<div class=\"muted replacements-label\">Instead Try:</div><ul>";
       for(var i=0; i<tip.replacements.length; i++){
-        html += "<li>" + tip.replacements[i] + "</li>";
+        html += "<li>" + tip.replacements[i] + " <a href=\"javascript://\" data-replacement=\"" + tip.replacements[i] + "\" class=\"apply-link\">(apply)</a>" + "</li>";
       }
       html += "</ul>";
     } else {
@@ -432,9 +448,6 @@
       "</div>"+
       "<div class=\"tip clearfix\">"+
         replacementHtml(tip) +
-        // "<div class=\"match-string\">"+
-        //  tip.matched_string +
-        // "</div>"+
         "<div class=\"explanation\">"+
           tip.explanation +
         "</div>" +
@@ -442,8 +455,9 @@
 
       var end = "</div>"+
           "</li>";
-
-    return beginning + end;
+      var $el = $(beginning + end);
+      $el.data('tipObject', tip);
+    return $el;
   }
 
   function showLoading(){
@@ -487,14 +501,13 @@
     $tipsList.empty();
     if(tips.length){
       for (var i = 0; i < tips.length; i++) {
-        var tip = tips[i],
-            //`tip` is immuteable, make a muteable copy to add
-            //the property `text_snippet` to
-            _tip = JSON.parse(JSON.stringify(tip));
-            _tip.text_snippet = prepareSnippet(fullText, tip);
-            var html = tipToHtml(_tip);
-            highlight(_tip);
-            $tipsList.append(html);
+        var tip = tips[i];
+        //`tip` is immuteable, make a muteable copy to add
+        //the property `text_snippet` to
+        var _tip = JSON.parse(JSON.stringify(tip));
+        _tip.text_snippet = prepareSnippet(fullText, tip);
+        var html = tipToHtml(_tip);
+        $tipsList.append(html);
       }
     } else {
       showNoResults()

@@ -38,4 +38,4 @@ Code actually lives in Google docs script editor :( This repository is for copy/
 
 * From the script editor: View > Execution Logs and View > Logs
 * Logger.log is Google scripts Logger.
-* Read the docs
+* Read the docs: https://developers.google.com/apps-script/quickstart/docs

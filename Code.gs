@@ -14,6 +14,25 @@ function highlight(tip){
   return true;
 }
 
+function underline(tip){
+  var body = DocumentApp.getActiveDocument().getBody(),
+      text = body.editAsText(),
+      range = body.findText(tip.match_string);
+  if(!range){
+    range = body.findText(tip.matched_string);
+  }
+  text.setUnderline(range.getStartOffset(), range.getEndOffsetInclusive(), true);
+  return true;
+}
+
+function applyTip(tip, replace){
+  underline(tip);
+  var body = DocumentApp.getActiveDocument().getBody();
+  body.replaceText(tip.match_string, replace);
+  body.replaceText(tip.matched_string, replace);
+  return true;
+}
+
 function saveGuide(guideId){
   userStore = PropertiesService.getUserProperties();
   userStore.setProperty('style_guide_id', guideId);
