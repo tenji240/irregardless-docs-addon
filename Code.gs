@@ -3,31 +3,39 @@ var HOST = "https://api.irregardless.ly/api/v1",
     MATCH_ENDPOINT = HOST + "/rules/match?api_key=" + API_KEY,
     GUIDES_ENDPOINT = HOST + "/style_guides?api_key=" + API_KEY;
 
-function highlight(tip){
-  var background = '#FFFF00',
-      body = DocumentApp.getActiveDocument().getBody(),
-      search = body.findText('googler');
+function getDocMatches(tip){
+  var body = DocumentApp.getActiveDocument().getBody(),
+      search = body.findText(tip.match_string) || body.findText(tip.matched_string),
+      searchMatches = [];
 
   while (search !== null) {
-    var searchEl = search.getElement();
-    var searchElText = searchEl.asText();
-
-    searchElText.setBackgroundColor(search.getStartOffset(), search.getEndOffsetInclusive(),background);
-
+    searchMatches.push({
+      startOffset: search.getStartOffset(),
+      endOffset: search.getEndOffsetInclusive(),
+      textEl: search.getElement().asText()
+    });
     // search for next match
-    search = body.findText('googler', search);
+    search = body.findText(tip.match_string, search) || body.findText(tip.matched_string, search);
+  }
+  return searchMatches;
+}
+
+function highlight(tip){
+  var matches = getDocMatches(tip),
+      match;
+  for(var i = 0; i < matches.length; i++){
+    match = matches[i];
+    match.textEl.setBackgroundColor(match.startOffset, match.endOffset, '#FFFF00');
   }
 }
 
 function underline(tip){
-  var body = DocumentApp.getActiveDocument().getBody(),
-      text = body.editAsText(),
-      range = body.findText(tip.match_string);
-  if(!range){
-    range = body.findText(tip.matched_string);
+  var matches = getDocMatches(tip),
+      match;
+  for(var i = 0; i < matches.length; i++){
+    match = matches[i];
+    match.textEl.setUnderline(match.startOffset, match.endOffset, true);
   }
-  text.setUnderline(range.getStartOffset(), range.getEndOffsetInclusive(), true);
-  return true;
 }
 
 function applyTip(tip, replace){
