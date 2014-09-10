@@ -4,14 +4,19 @@ var HOST = "https://api.irregardless.ly/api/v1",
     GUIDES_ENDPOINT = HOST + "/style_guides?api_key=" + API_KEY;
 
 function highlight(tip){
-  var body = DocumentApp.getActiveDocument().getBody(),
-      text = body.editAsText(),
-      range = body.findText(tip.match_string);
-  if(!range){
-    range = body.findText(tip.matched_string);
+  var background = '#FFFF00',
+      body = DocumentApp.getActiveDocument().getBody(),
+      search = body.findText('googler');
+
+  while (search !== null) {
+    var searchEl = search.getElement();
+    var searchElText = searchEl.asText();
+
+    searchElText.setBackgroundColor(search.getStartOffset(), search.getEndOffsetInclusive(),background);
+
+    // search for next match
+    search = body.findText('googler', search);
   }
-  text.setBackgroundColor(range.getStartOffset(), range.getEndOffsetInclusive(), '#FFFF00');
-  return true;
 }
 
 function underline(tip){
