@@ -29,17 +29,7 @@ function highlight(tip){
   }
 }
 
-function underline(tip){
-  var matches = getDocMatches(tip),
-      match;
-  for(var i = 0; i < matches.length; i++){
-    match = matches[i];
-    match.textEl.setUnderline(match.startOffset, match.endOffset, true);
-  }
-}
-
 function applyTip(tip, replace){
-  underline(tip);
   var body = DocumentApp.getActiveDocument().getBody();
   body.replaceText(tip.match_string, replace);
   body.replaceText(tip.matched_string, replace);
