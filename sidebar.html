@@ -15,6 +15,12 @@
   .muted {
     color: #6d6d6d;
   }
+  .float-left {
+    float: left;
+  }
+  .float-right {
+    float: right;
+  }
   ul {
     text-align: left;
     padding-left: 20px;
@@ -52,6 +58,53 @@
     -khtml-opacity: 1;
     opacity: 1;
   }
+  .actions {
+    border-bottom: 1px solid #ddd;
+    padding: 13px 11px;
+    background: #fcfcfc;
+  }
+  .btn {
+    display: inline-block;
+    padding: 6px 12px;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+  .btn:hover {
+    text-decoration: none;
+  }
+  .btn-primary {
+    background-color: #f26262;
+    color: white;
+  }
+  .btn-secondary {
+    border: 1px solid #d9d9d9;
+    background-color: #fdfdfd;
+    color: #f26262;
+  }
+  action-button:hover {
+    text-decoration: none;
+  }
+  .settings-trigger {
+    position: relative;
+    float: right;
+    top: 9px;
+    z-index: 100;
+    display: inline-block;
+    text-align: right;
+    cursor: pointer;
+    text-transform: capitalize;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .settings-trigger:hover {
+    background: #fefefe;
+  }
   .settings {
     position: absolute;
     left: 0;
@@ -74,27 +127,6 @@
   .settings.showing {
     max-height: 200px;
     overflow-y: scroll;
-  }
-  .settings-trigger {
-    position: relative;
-    z-index: 100;
-    display: none;
-    padding: 9px 8px 7px;
-    background: #fcfcfc;
-    text-align: right;
-    cursor: pointer;
-    border-bottom: 1px solid #ddd;
-    text-transform: capitalize;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .settings-trigger:hover {
-    background: #fefefe;
-  }
-  .current-styleguide {
-    color: #474747;
-    font-weight: bold;
   }
   .styleguide-list {
     list-style: none;
@@ -168,8 +200,6 @@
     overflow-y: scroll;
     padding-bottom: 35px;
     box-sizing: border-box;
-    -mox-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
   }
   .tip-container {
     position: relative;
@@ -286,9 +316,11 @@
 <div class="addon">
   <div class="sidebar">
     <div class="tips-container">
-      <div id="settings-trigger" class="settings-trigger" data-toggle-settings>
-        <span class="muted">current styleguide: </span>
-        <span id="current-styleguide" class="current-styleguide"></span>
+      <div class="actions clearfix">
+        <a href="javascript://" class="btn btn-primary float-left" data-get-tips>Get Tips</a>
+        <a id="settings-trigger" class="btn btn-secondary float-right" data-toggle-settings>
+          Styleguide: <span id="current-styleguide">Everything</span>
+        </a>
       </div>
       <div class="settings">
         <ul class="unstyled styleguide-list">
@@ -300,7 +332,7 @@
       </div>
       <ul class="tips-list unstyled">
       </ul>
-      <div id="cover-bg">
+      <div id="cover-bg" data-toggle-settings>
       </div>
     </div>
     <div class="footer">
@@ -326,18 +358,21 @@
         $coverBG = $('#cover-bg');
 
     $(function() {
-      getGuides();
       getTips();
+      getGuides();
       $(document).on("click", ".apply-link", function(evt){
         var tip = $(this).closest(".tip-container").data('tipObject');
         applyTip(tip, $(this).data('replacement'));
         evt.stopPropagation();
       });
+      $(document).on("click", "[data-get-tips]", function(){
+        getTips();
+      });
       $(document).on("click", ".tip-container", function(){
         var tip = $(this).data('tipObject');
         highlight(tip);
       });
-      $("[data-toggle-settings]").on("click", function(){
+      $(document).on("click", "[data-toggle-settings]", function(){
         if($settings.is(":visible")){
           $settings.removeClass('showing');
           $coverBG.removeClass('showing');
@@ -426,13 +461,13 @@
            html;
        if(guide.id === selectedGuideId){
          chosenGuideHtml = "<li class=\"chosen-guide\" data-save-guide-id=" +
-                    guide.id + "><span class=\"check\">&#x2713;</span> " +
+                    guide.id + " data-toggle-settings ><span class=\"check\">&#x2713;</span> " +
                     guide.name +
                   "</li>";
          $currentGuide.html(guide.name);
          $settingsTrigger.show();
        } else {
-         html = "<li data-save-guide-id=" + guide.id + ">" +  guide.name + "</li>";
+         html = "<li data-save-guide-id=" + guide.id + " data-toggle-settings>" +  guide.name + "</li>";
          $styleGuideList.append(html);
        }
      }
@@ -502,8 +537,13 @@
   function showNoText(){
     $notice.html("Looks like you don't have any writing in your document.").show();
   }
+  
+  function showInstructions(){
+    $notice.html("Click 'Get Tips' to check your writing.").show();
+  }
 
   function getTips(){
+    $tipsList.empty();
     showLoading()
     google.script.run
         .withSuccessHandler(
@@ -524,7 +564,6 @@
 
   function showTips(fullText, tips){
     $notice.hide();
-    $tipsList.empty();
     if(tips.length){
       for (var i = 0; i < tips.length; i++) {
         var tip = tips[i];
