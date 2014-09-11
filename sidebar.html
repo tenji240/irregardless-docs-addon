@@ -435,6 +435,14 @@
     }
     return html + "</div>";
   }
+  
+  function linkify(string){
+    var urlRegex = /(https?:\/\/[^\s]+)/g;
+    if(!string) return;
+    return string.replace(urlRegex, function(url) {
+      return '<a target="_blank" href="' + url + '">' + url + '</a>';
+    });
+  }
 
   function tipToHtml(tip){
     var beginning = "<li class=\"tip-container\">"+
@@ -449,7 +457,7 @@
       "<div class=\"tip clearfix\">"+
         replacementHtml(tip) +
         "<div class=\"explanation\">"+
-          tip.explanation +
+          linkify(tip.explanation) +
         "</div>" +
         "<div class='tip-border'></div>";
 
