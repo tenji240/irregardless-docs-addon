@@ -360,7 +360,7 @@
     $(function() {
       getTips();
       getGuides();
-      $(document).on("click", ".apply-link", function(evt){
+      $(document).on("click", "[data-apply-tip]", function(evt){
         var tip = $(this).closest(".tip-container").data('tipObject');
         applyTip(tip, $(this).data('replacement'));
         evt.stopPropagation();
@@ -480,7 +480,7 @@
     if(tip.replacements && tip.replacements.length){
       html += "<div class=\"muted replacements-label\">Instead Try:</div><ul>";
       for(var i=0; i<tip.replacements.length; i++){
-        html += "<li>" + tip.replacements[i] + " <a href=\"javascript://\" data-replacement=\"" + tip.replacements[i] + "\" class=\"apply-link\">(apply)</a>" + "</li>";
+        html += "<li>" + " <a href=\"javascript://\" data-replacement=\"" + tip.replacements[i] + "\" data-apply-tip>" + tip.replacements[i] + "</a>" + "</li>";
       }
       html += "</ul>";
     } else {
