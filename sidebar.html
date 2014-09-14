@@ -488,13 +488,18 @@
     }
     return html + "</div>";
   }
-  
+
   function linkify(string){
     var urlRegex = /(https?:\/\/[^\s]+)/g;
     if(!string) return;
     return string.replace(urlRegex, function(url) {
       return '<a target="_blank" href="' + url + '">' + url + '</a>';
     });
+  }
+
+  function truncate(string, length){
+    if(string.length <= length) return string;
+    else return string.substring(0, length) + "...";
   }
 
   function tipToHtml(tip){
@@ -510,7 +515,8 @@
       "<div class=\"tip clearfix\">"+
         replacementHtml(tip) +
         "<div class=\"explanation\">"+
-          linkify(tip.explanation) +
+          linkify(truncate(tip.explanation, 230)) +
+          "<a href=\"http://irregardless.ly/#!/tip/" + tip.id + "\" target=\"_blank\" class=\"more-link\">more</a>" +
         "</div>" +
         "<div class='tip-border'></div>";
 
