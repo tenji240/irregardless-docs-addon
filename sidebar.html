@@ -89,11 +89,15 @@
   action-button:hover {
     text-decoration: none;
   }
+  .arrow {
+    font-size: 0.8em;
+  }
   .settings-trigger {
     position: relative;
     float: right;
-    top: 9px;
+    top: 6px;
     z-index: 100;
+    width: 68%;
     display: inline-block;
     text-align: right;
     cursor: pointer;
@@ -103,7 +107,7 @@
     white-space: nowrap;
   }
   .settings-trigger:hover {
-    background: #fefefe;
+    text-decoration: none;
   }
   .settings {
     position: absolute;
@@ -318,8 +322,8 @@
     <div class="tips-container">
       <div class="actions clearfix">
         <a href="javascript://" class="btn btn-primary float-left" data-get-tips>Get Tips</a>
-        <a id="settings-trigger" class="btn btn-secondary float-right" data-toggle-settings>
-          Styleguide: <span id="current-styleguide">Everything</span>
+        <a id="settings-trigger" class="settings-trigger" data-toggle-settings>
+          <span class="arrow">&#9660;</span> <span id="current-styleguide">Everything</span>
         </a>
       </div>
       <div class="settings">

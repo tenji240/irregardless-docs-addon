@@ -1,7 +1,7 @@
 var HOST = "https://api.irregardless.ly/api/v1",
     API_KEY = "3tkaamd9zazzwa27z4x6xmns",
     MATCH_ENDPOINT = HOST + "/rules/match?api_key=" + API_KEY,
-    GUIDES_ENDPOINT = HOST + "/style_guides?api_key=" + API_KEY;
+    GUIDES_ENDPOINT = HOST + "/style_guides?recommended=true&api_key=" + API_KEY;
 
 function getDocMatches(tip){
   var body = DocumentApp.getActiveDocument().getBody(),
