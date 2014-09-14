@@ -368,10 +368,6 @@
       $(document).on("click", "[data-get-tips]", function(){
         getTips();
       });
-      $(document).on("click", ".tip-container", function(){
-        var tip = $(this).data('tipObject');
-        highlight(tip);
-      });
       $(document).on("click", "[data-toggle-settings]", function(){
         if($settings.is(":visible")){
           $settings.removeClass('showing');
@@ -573,6 +569,7 @@
     if(tips.length){
       for (var i = 0; i < tips.length; i++) {
         var tip = tips[i];
+        highlight(tip);
         //`tip` is immuteable, make a muteable copy to add
         //the property `text_snippet` to
         var _tip = JSON.parse(JSON.stringify(tip));
