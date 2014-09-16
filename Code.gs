@@ -12,7 +12,9 @@ function getDocMatches(tip){
     searchMatches.push({
       startOffset: search.getStartOffset(),
       endOffset: search.getEndOffsetInclusive(),
-      textEl: search.getElement().asText()
+      textEl: search.getElement().asText(),
+      ogBgColor: search.getElement().asText().getBackgroundColor(),
+      text: search.getElement().asText().getText()
     });
     // search for next match
     search = body.findText(tip.match_string, search) || body.findText(tip.matched_string, search);
@@ -23,10 +25,12 @@ function getDocMatches(tip){
 function highlight(tip){
   var matches = getDocMatches(tip),
       match;
+
   for(var i = 0; i < matches.length; i++){
     match = matches[i];
     match.textEl.setBackgroundColor(match.startOffset, match.endOffset, '#FFFF00');
   }
+  return matches;
 }
 
 function applyTip(tip, replace){

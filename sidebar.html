@@ -62,10 +62,16 @@
     border-bottom: 1px solid #ddd;
     padding: 13px 11px;
     background: #fcfcfc;
+    text-align: center;
+  }
+  .clear-button {
+    padding-left: 8px;
+    display: inline-block;
   }
   .btn {
     display: inline-block;
     padding: 6px 12px;
+    margin: 0 4px;
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
@@ -93,18 +99,15 @@
     font-size: 0.8em;
   }
   .settings-trigger {
-    position: relative;
-    float: right;
-    top: 6px;
-    z-index: 100;
-    width: 68%;
     display: inline-block;
-    text-align: right;
-    cursor: pointer;
-    text-transform: capitalize;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border: 1px solid #ccc;
+    margin-top: 14px;
+    padding: 4px;
+    border-radius: 4px;
+    color: #666;
   }
   .settings-trigger:hover {
     text-decoration: none;
@@ -320,8 +323,11 @@
 <div class="addon">
   <div class="sidebar">
     <div class="tips-container">
-      <div class="actions clearfix">
-        <a href="javascript://" class="btn btn-primary float-left" data-get-tips>Get Tips</a>
+      <div class="actions">
+        <div class="clearfix">
+          <a href="javascript://" class="btn btn-primary" data-get-tips>Get Tips</a>
+          <a href="javascript://" class="btn btn-secondary clear-button" data-clear-highlights>clear</a>
+        </div>
         <a id="settings-trigger" class="settings-trigger" data-toggle-settings>
           <span class="arrow">&#9660;</span> <span id="current-styleguide">Everything</span>
         </a>
@@ -371,6 +377,9 @@
       });
       $(document).on("click", "[data-get-tips]", function(){
         getTips();
+      });
+      $(document).on("click", "[data-clear-highlights]", function(){
+        removeHighlights();
       });
       $(document).on("click", "[data-toggle-settings]", function(){
         if($settings.is(":visible")){
@@ -425,10 +434,7 @@
 
    function highlight(tip){
       google.script.run
-          .withSuccessHandler(
-            function() {
-              //
-            })
+          .withSuccessHandler(function(highlightMatch) {})
           .withFailureHandler(
             function() {
               showError();
@@ -566,6 +572,9 @@
           })
         .withUserObject(this)
         .getTips();
+  }
+
+  function removeHighlights(){
   }
 
   function showTips(fullText, tips){
