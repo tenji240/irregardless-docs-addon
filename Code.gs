@@ -1,7 +1,8 @@
 var HOST = "https://api.irregardless.ly/api/v1",
     API_KEY = "3tkaamd9zazzwa27z4x6xmns",
     MATCH_ENDPOINT = HOST + "/rules/match?api_key=" + API_KEY,
-    GUIDES_ENDPOINT = HOST + "/style_guides?recommended=true&api_key=" + API_KEY;
+    GUIDES_ENDPOINT = HOST + "/style_guides?recommended=true&api_key=" + API_KEY,
+    GUIDES_QUERY_ENDPOINT = HOST + "/style_guides?api_key=" + API_KEY;
 
 function getDocMatches(tip){
   var body = DocumentApp.getActiveDocument().getBody(),
@@ -48,8 +49,12 @@ function saveGuide(guideId){
           chosenGuideId: Number(userStore.getProperty('style_guide_id'))};
 }
 
-function getGuides(){
-  var response = UrlFetchApp.fetch(GUIDES_ENDPOINT),
+function getGuides(query){
+  var url;
+  if(query) url = GUIDES_QUERY_ENDPOINT + "&q=" + query;
+  else     url = GUIDES_ENDPOINT;
+
+  var response = UrlFetchApp.fetch(url),
       json = response.getContentText(),
       userStore = PropertiesService.getUserProperties();
 

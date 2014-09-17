@@ -15,6 +15,9 @@
   .muted {
     color: #6d6d6d;
   }
+  .centered {
+    text-align: center;
+  }
   .float-left {
     float: left;
   }
@@ -134,6 +137,12 @@
   .settings.showing {
     max-height: 300px;
     overflow-y: scroll;
+  }
+  #styleguide-query-input {
+    margin: 10px;
+    width: 92%;
+    padding: 10px;
+    height: 30px;
   }
   .styleguide-list {
     list-style: none;
@@ -333,6 +342,7 @@
         </a>
       </div>
       <div class="settings">
+        <input type="text" id="styleguide-query-input" />
         <ul class="unstyled styleguide-list">
         </ul>
         <div class="spinner">
@@ -370,6 +380,9 @@
     $(function() {
       getTips();
       getGuides();
+      $(document).on("keyup", "#styleguide-query-input", function(evt){
+        getGuides($(this).val());
+      });
       $(document).on("click", "[data-apply-tip]", function(evt){
         var tip = $(this).closest(".tip-container").data('tipObject');
         applyTip(tip, $(this).data('replacement'));
@@ -419,7 +432,8 @@
           .saveGuide(guideId);
   }
 
-   function getGuides(){
+   function getGuides(query){
+      showLoadingGuides();
       google.script.run
           .withSuccessHandler(
             function(resp) {
@@ -429,7 +443,7 @@
             function() {
               showError();
             })
-          .getGuides();
+          .getGuides(query);
    }
 
    function highlight(tip){
@@ -535,6 +549,11 @@
 
   function showLoading(){
     $notice.html("Loading...").show();
+  }
+
+  function showLoadingGuides(){
+    $styleGuideList.empty();
+    $styleGuideList.append("<li class='centered muted'>Loading...</li>");
   }
 
   function showNoResults(){
