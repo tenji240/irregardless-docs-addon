@@ -390,8 +390,9 @@
       getTips();
       getGuides();
       $(document).on("keyup", "#styleguide-query-input", function(evt){
+        var $input = $(this)
         delay(function(){
-          getGuides($(this).val());
+          getGuides($input.val());
         }, 1000 );
       });
       $(document).on("click", "[data-apply-tip]", function(evt){
@@ -487,22 +488,26 @@
          chosenGuideHtml;
 
      $styleGuideList.empty();
-     for(var i=0; i<guides.length; i++){
-       var guide = guides[i],
-           html;
-       if(guide.id === selectedGuideId){
-         chosenGuideHtml = "<li class=\"chosen-guide\" data-save-guide-id=" +
-                    guide.id + " data-toggle-settings ><span class=\"check\">&#x2713;</span> " +
-                    guide.name +
-                  "</li>";
-         $currentGuide.html(guide.name);
-         $settingsTrigger.show();
-       } else {
-         html = "<li data-save-guide-id=" + guide.id + " data-toggle-settings>" +  guide.name + "</li>";
-         $styleGuideList.append(html);
+     if(guides.length) {
+       for(var i=0; i<guides.length; i++){
+         var guide = guides[i],
+             html;
+         if(guide.id === selectedGuideId){
+           chosenGuideHtml = "<li class=\"chosen-guide\" data-save-guide-id=" +
+                      guide.id + " data-toggle-settings ><span class=\"check\">&#x2713;</span> " +
+                      guide.name +
+                    "</li>";
+           $currentGuide.html(guide.name);
+           $settingsTrigger.show();
+         } else {
+           html = "<li data-save-guide-id=" + guide.id + " data-toggle-settings>" +  guide.name + "</li>";
+           $styleGuideList.append(html);
+         }
        }
+       $styleGuideList.prepend(chosenGuideHtml);
+     } else {
+       $styleGuideList.append("<li class='muted centered'> No results...</li>");
      }
-     $styleGuideList.prepend(chosenGuideHtml);
    }
 
   //either build an <ul> or return Don't use
