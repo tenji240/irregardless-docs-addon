@@ -376,12 +376,23 @@
         $settingsTrigger = $("#settings-trigger"),
         $currentGuide = $("#current-styleguide"),
         $coverBG = $('#cover-bg');
+   
+   //throttler for the keyup
+   var delay = (function(){
+      var timer = 0;
+      return function(callback, ms){
+        clearTimeout (timer);
+        timer = setTimeout(callback, ms);
+      };
+   })();
 
     $(function() {
       getTips();
       getGuides();
       $(document).on("keyup", "#styleguide-query-input", function(evt){
-        getGuides($(this).val());
+        delay(function(){
+          getGuides($(this).val());
+        }, 1000 );
       });
       $(document).on("click", "[data-apply-tip]", function(evt){
         var tip = $(this).closest(".tip-container").data('tipObject');
@@ -550,7 +561,7 @@
   function showLoading(){
     $notice.html("Loading...").show();
   }
-
+  
   function showLoadingGuides(){
     $styleGuideList.empty();
     $styleGuideList.append("<li class='centered muted'>Loading...</li>");
