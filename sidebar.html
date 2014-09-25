@@ -369,138 +369,133 @@
 
 <script>
 
-    var $notice = $("#notice"),
+/***********************  Global Helpers  **************************/
+var throttle = (function(){
+  var timer = 0;
+  return function(callback, ms){
+    clearTimeout (timer);
+    timer = setTimeout(callback, ms);
+  };
+})();
+
+
+/***********************  Tip Rendering  **************************/
+
+var Tip = function(tip, fullText) { 
+  tip.text_snippet = this.prepareSnippet(fullText, tip);
+  this.tip = tip; 
+};
+//either build an <ul> or return Don't use
+Tip.prototype.replacementHtml = function (){
+  var html = "<div class=\"replacements\">";
+  if(this.tip.replacements && this.tip.replacements.length){
+    html += "<div class=\"muted replacements-label\">Instead Try:</div><ul>";
+    for(var i=0; i < this.tip.replacements.length; i++){
+      html += "<li>" + " <a title=\"Click to apply\" href=\"javascript://\" data-replacement=\"" + this.tip.replacements[i] + "\" data-apply-tip>" + this.tip.replacements[i] + "</a>" + "</li>";
+    }
+    html += "</ul>";
+  } else {
+   html += "<div class=\"muted replacements-label\"> Don't Use </div>";
+  }
+  return html + "</div>";
+}
+
+Tip.prototype.linkify = function (string) {
+  var urlRegex = /(https?:\/\/[^\s]+)/g;
+  if(!string) return;
+  return string.replace(urlRegex, function(url) {
+    return '<a target="_blank" href="' + url + '">' + url + '</a>';
+  });
+}
+
+Tip.prototype.truncate = function (string, length){
+  if(string.length <= length) return string;
+  else return string.substring(0, length) + "...";
+}
+
+Tip.prototype.render = function (){
+  var beginning = "<li class=\"tip-container\">"+
+    "<div class=\"creator\">"+
+      "<a href='http://irregardless.ly/#!/profile/" + this.tip.creator.id + "' target='_blank'>"+
+        "<img src=\""+ this.tip.creator.mugshot_url+"\" title=\""+ this.tip.creator.name.split(' ')[0] + "\" alt=\""+ this.tip.creator.name.split(' ')[0] + "\" />"+
+      "</a>"+
+    "</div>"+
+    "<div class=\"text-snippet\">"+
+      this.tip.text_snippet +
+    "</div>"+
+    "<div class=\"tip clearfix\">"+
+      this.replacementHtml() +
+      "<div class=\"explanation\">"+
+        this.linkify(this.truncate(this.tip.explanation, 230)) +
+        "<a href=\"http://irregardless.ly/#!/tip/" + this.tip.id + "\" target=\"_blank\" class=\"more-link\">more</a>" +
+      "</div>" +
+      "<div class='tip-border'></div>";
+
+    var end = "</div>"+
+        "</li>";
+    var $el = $(beginning + end);
+    $el.data('tipObject', this.tip);
+  return $el;
+}
+
+Tip.prototype.prepareSnippet = function(fullText, tip){
+  //match will either be in the tip's `match_string`,
+  //or the tips `matched_string`
+  var match, snippet, indexOfM;
+  if(fullText.indexOf(tip.match_string) !== -1){
+    match = tip.match_string;
+  } else {
+    match = tip.matched_string;
+  }
+  //if text is short, snippet is the text
+  if(fullText.length < 100) {
+    snippet = fullText;
+  } else {
+    indexOfM = fullText.indexOf(match);
+    //match is in the first 50 characters
+    if(indexOfM < 50){
+      snippet = fullText.slice(0, 100) + "...";
+    //match is in the last 50 characters
+    } else if(fullText.length - indexOfM < 50) {
+      snippet = fullText.slice(fullText.length - 100, fullText.length);
+    //match is somewhere in the middle
+    } else {
+     snippet = fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
+    }
+  }
+  return snippet.replace(match, "<span class=\"match-content\">" + match +"</span>");
+}
+
+
+/***********************  Sidebar control functions  **************************/
+
+var SideBarObj = function() {
+   var $notice = $("#notice"),
         $tipsList = $('.tips-list'),
         $styleGuideList = $(".styleguide-list"),
         $settings = $('.settings'),
         $settingsTrigger = $("#settings-trigger"),
         $currentGuide = $("#current-styleguide"),
         $coverBG = $('#cover-bg');
-   
-   //throttler for the keyup
-   var delay = (function(){
-      var timer = 0;
-      return function(callback, ms){
-        clearTimeout (timer);
-        timer = setTimeout(callback, ms);
-      };
-   })();
-
-    $(function() {
-      getTips();
-      getGuides();
-      $(document).on("keyup", "#styleguide-query-input", function(evt){
-        var $input = $(this)
-        delay(function(){
-          getGuides($input.val());
-        }, 1000 );
-      });
-      $(document).on("click", "[data-apply-tip]", function(evt){
-        var tip = $(this).closest(".tip-container").data('tipObject');
-        applyTip(tip, $(this).data('replacement'));
-        evt.stopPropagation();
-      });
-      $(document).on("click", "[data-get-tips]", function(){
-        getTips();
-      });
-      $(document).on("click", "[data-clear-highlights]", function(){
-        removeHighlights();
-      });
-      $(document).on("click", "[data-toggle-settings]", function(){
-        if($settings.is(":visible")){
-          $settings.removeClass('showing');
-          $coverBG.removeClass('showing');
-          setTimeout(function(){
-            $settings.hide();
-            $coverBG.hide();
-          },500);
-        } else {
-          $settings.show();
-          $coverBG.show();
-          setTimeout(function(){
-            $settings.addClass('showing');
-            $coverBG.addClass('showing');
-          },0);
-        }
-      });
-
-      $styleGuideList.on("click", "[data-save-guide-id]", function(){
-        saveGuide($(this).data("save-guide-id"));
-      });
-    });
-
-  function saveGuide(guideId){
-      google.script.run
-          .withSuccessHandler(
-            function(resp) {
-              $settings.hide();
-              renderGuides(resp);
-              getTips();
-            })
-          .withFailureHandler(
-            function() {
-              showError();
-            })
-          .saveGuide(guideId);
-  }
-
-   function getGuides(query){
-      showLoadingGuides();
-      google.script.run
-          .withSuccessHandler(
-            function(resp) {
-              renderGuides(resp);
-            })
-          .withFailureHandler(
-            function() {
-              showError();
-            })
-          .getGuides(query);
-   }
-
-   function highlight(tip){
-      google.script.run
-          .withSuccessHandler(function(highlightMatch) {})
-          .withFailureHandler(
-            function() {
-              showError();
-            })
-          .highlight(tip);
-   }
-
-   function applyTip(tip, replace){
-     google.script.run
-          .withSuccessHandler(
-            function() {
-              //
-            })
-          .withFailureHandler(
-            function() {
-              showError();
-            })
-          .applyTip(tip, replace);
-   }
-
-   //expects resp.guides and resp.chosenGuideId
-   function renderGuides(resp){
-     var guides = resp.guides,
-         selectedGuideId = resp.chosenGuideId || 1, //1 is the "Everything" guide.
+ 
+   // Could be further extracted
+   this.renderGuides = function(guides) {
+     var guides = guides || Irregardless.guides,
          chosenGuideHtml;
-
      $styleGuideList.empty();
      if(guides.length) {
        for(var i=0; i<guides.length; i++){
          var guide = guides[i],
              html;
-         if(guide.id === selectedGuideId){
-           chosenGuideHtml = "<li class=\"chosen-guide\" data-save-guide-id=" +
+         if(guide.id === Irregardless.selectedGuideId){
+           chosenGuideHtml = "<li class=\"chosen-guide\" data-save-guide-name=\"" + guide.name + "\" data-save-guide-id=" +
                       guide.id + " data-toggle-settings ><span class=\"check\">&#x2713;</span> " +
                       guide.name +
                     "</li>";
            $currentGuide.html(guide.name);
            $settingsTrigger.show();
          } else {
-           html = "<li data-save-guide-id=" + guide.id + " data-toggle-settings>" +  guide.name + "</li>";
+           html = "<li data-save-guide-id=" + guide.id + " data-save-guide-name=\"" + guide.name + "\" data-toggle-settings>" +  guide.name + "</li>";
            $styleGuideList.append(html);
          }
        }
@@ -509,154 +504,196 @@
        $styleGuideList.append("<li class='muted centered'> No results...</li>");
      }
    }
-
-  //either build an <ul> or return Don't use
-  function replacementHtml(tip){
-    var html = "<div class=\"replacements\">";
-    if(tip.replacements && tip.replacements.length){
-      html += "<div class=\"muted replacements-label\">Instead Try:</div><ul>";
-      for(var i=0; i<tip.replacements.length; i++){
-        html += "<li>" + " <a href=\"javascript://\" data-replacement=\"" + tip.replacements[i] + "\" data-apply-tip>" + tip.replacements[i] + "</a>" + "</li>";
+   
+   
+   this.showTips = function(fullText, tips){
+     $notice.hide();
+     if(tips.length){
+       for (var i = 0; i < tips.length; i++) {
+         var tip = tips[i];
+         GoogleInterface.highlight(tip);
+         //`tip` is immuteable, make a muteable copy to add
+         //the property `text_snippet` to
+         var _tip = JSON.parse(JSON.stringify(tip));
+         var html = new Tip(_tip, fullText).render();
+         $tipsList.append(html);
       }
-      html += "</ul>";
     } else {
-     html += "<div class=\"muted replacements-label\"> Don't Use </div>";
+      this.showNoResults()
     }
-    return html + "</div>";
   }
-
-  function linkify(string){
-    var urlRegex = /(https?:\/\/[^\s]+)/g;
-    if(!string) return;
-    return string.replace(urlRegex, function(url) {
-      return '<a target="_blank" href="' + url + '">' + url + '</a>';
-    });
+  
+  this.toggleSettings = function() {
+    if($settings.is(":visible")){
+      $settings.removeClass('showing');
+      $coverBG.removeClass('showing');
+      setTimeout(function(){
+        $settings.hide();
+        $coverBG.hide();
+      },500);
+    } else {
+      $settings.show();
+      $coverBG.show();
+      setTimeout(function(){
+        $settings.addClass('showing');
+        $coverBG.addClass('showing');
+      },0);
+    }
   }
-
-  function truncate(string, length){
-    if(string.length <= length) return string;
-    else return string.substring(0, length) + "...";
+  
+  this.clearTips = function() {
+    $tipsList.empty();
   }
-
-  function tipToHtml(tip){
-    var beginning = "<li class=\"tip-container\">"+
-      "<div class=\"creator\">"+
-        "<a href='http://irregardless.ly/#!/profile/" + tip.creator.id + "' target='_blank'>"+
-          "<img src=\""+ tip.creator.mugshot_url+"\" title=\""+ tip.creator.name.split(' ')[0] + "\" alt=\""+ tip.creator.name.split(' ')[0] + "\" />"+
-        "</a>"+
-      "</div>"+
-      "<div class=\"text-snippet\">"+
-        tip.text_snippet +
-      "</div>"+
-      "<div class=\"tip clearfix\">"+
-        replacementHtml(tip) +
-        "<div class=\"explanation\">"+
-          linkify(truncate(tip.explanation, 230)) +
-          "<a href=\"http://irregardless.ly/#!/tip/" + tip.id + "\" target=\"_blank\" class=\"more-link\">more</a>" +
-        "</div>" +
-        "<div class='tip-border'></div>";
-
-      var end = "</div>"+
-          "</li>";
-      var $el = $(beginning + end);
-      $el.data('tipObject', tip);
-    return $el;
-  }
-
-  function showLoading(){
+  
+  this.showLoading = function () {
     $notice.html("Loading...").show();
   }
   
-  function showLoadingGuides(){
+  this.showLoadingGuides = function () {
     $styleGuideList.empty();
     $styleGuideList.append("<li class='centered muted'>Loading...</li>");
   }
 
-  function showNoResults(){
+  this.showNoResults = function(){
     $notice.html("No results. <br /> Your writing looks good!").show();
   }
 
-  function showError(){
+  this.showError = function(){
     $(".tips-list").empty();
     $notice.html("Oops! Something went wrong.<br />Please refresh and try again").show();
   }
 
-  function showNoText(){
+  this.showNoText = function (){
     $notice.html("Looks like you don't have any writing in your document.").show();
   }
   
-  function showInstructions(){
+  this.showInstructions = function (){
     $notice.html("Click 'Get Tips' to check your writing.").show();
   }
+}
 
-  function getTips(){
-    $tipsList.empty();
-    showLoading()
-    google.script.run
-        .withSuccessHandler(
-          function(resp) {
-            if(resp.error === "noText"){
-              showNoText();
-            } else {
-              showTips(resp.fullText, resp.tips);
-            }
-          })
-        .withFailureHandler(
-          function(msg, element) {
-            showError();
-          })
-        .withUserObject(this)
-        .getTips();
-  }
+var SideBar;
+$(function() { SideBar = new SideBarObj(); }); // Init on DOM ready
 
-  function removeHighlights(){
-  }
+    
+var GoogleInterface = new function() {
+  var noOp = function() {};
 
-  function showTips(fullText, tips){
-    $notice.hide();
-    if(tips.length){
-      for (var i = 0; i < tips.length; i++) {
-        var tip = tips[i];
-        highlight(tip);
-        //`tip` is immuteable, make a muteable copy to add
-        //the property `text_snippet` to
-        var _tip = JSON.parse(JSON.stringify(tip));
-        _tip.text_snippet = prepareSnippet(fullText, tip);
-        var html = tipToHtml(_tip);
-        $tipsList.append(html);
-      }
-    } else {
-      showNoResults()
-    }
-  }
+   this.highlight = function(tip) {
+      google.script.run
+          .withSuccessHandler(function(highlightMatch) {})
+          .withFailureHandler(
+            function() {
+              SideBar.showError();
+            })
+          .highlight(tip);
+   }
+   
+   function removeHighlights(){
+     //DocumentApp.getActiveDocument().getBody().editAsText().setBackgroundColor("#FFFFFF");
+     //.setBackgroundColor(match.startOffset, match.endOffset, '#FFFF00');
+   }
 
-  function prepareSnippet(fullText, tip){
-    //match will either be in the tip's `match_string`,
-    //or the tips `matched_string`
-    var match, snippet, indexOfM;
-    if(fullText.indexOf(tip.match_string) !== -1){
-      match = tip.match_string;
-    } else {
-      match = tip.matched_string;
-    }
-    //if text is short, snippet is the text
-    if(fullText.length < 100) {
-      snippet = fullText;
-    } else {
-      indexOfM = fullText.indexOf(match);
-      //match is in the first 50 characters
-      if(indexOfM < 50){
-        snippet = fullText.slice(0, 100) + "...";
-      //match is in the last 50 characters
-      } else if(fullText.length - indexOfM < 50) {
-        snippet = fullText.slice(fullText.length - 100, fullText.length);
-      //match is somewhere in the middle
-      } else {
-        snippet = fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
-      }
-    }
+   this.applyTip = function(tip, replace){
+     google.script.run
+          .withSuccessHandler(
+            function() {
+              //
+            })
+          .withFailureHandler(
+            function() {
+              SideBar.showError();
+            })
+          .applyTip(tip, replace);
+   }
+  
+}
 
-    return snippet.replace(match, "<span class=\"match-content\">" + match +"</span>");
-  }
+  
+/***********************  Irregardless API Interface  **************************/
+
+var Irregardless = new function() {
+  var self = this,
+      HOST = "https://api.irregardless.ly/api/v1",
+      API_KEY = "3tkaamd9zazzwa27z4x6xmns",
+      MATCH_ENDPOINT = HOST + "/rules/match?api_key=" + API_KEY,
+      GUIDES_ENDPOINT = HOST + "/style_guides?recommended=true&api_key=" + API_KEY,
+      GUIDES_QUERY_ENDPOINT = HOST + "/style_guides?api_key=" + API_KEY;
+      
+  this.selectedGuideId = 1;
+  this.guides = [];
+  
+  this.fetchTips = function() {
+    SideBar.clearTips();
+    SideBar.showLoading();
+
+    google.script.run.withSuccessHandler(function(resp) {
+      SideBar.showTips(resp.fullText, resp.tips);
+    }).withFailureHandler(function(msg, err) { 
+      SideBar.showError(); 
+    }).fetchTips(this.selectedGuideId);
+  };
+  
+  
+   this.fetchGuides = function(query) {
+     SideBar.showLoadingGuides();
+     google.script.run.withSuccessHandler(function(resp) {
+       if (self.guides.length == 0 && typeof query == 'undefined') {
+         self.guides = resp; // initial population, we also add anything clicked on
+       }
+       SideBar.renderGuides(resp);
+     }).withFailureHandler(function(msg, err) { 
+       SideBar.showError(); 
+     }).fetchGuides(query);
+   };
+   
+   this.addGuide = function(guide) {
+     if ($.inArray(guide.id, $.map(this.guides, function(g) { return g.id; })) < 0) {
+       this.guides = this.guides.concat([guide]);
+     }
+   }
+}
+
+
+
+
+/***********************  Do the things  **************************/
+
+$(function() {
+  Irregardless.fetchTips();
+  Irregardless.fetchGuides();
+
+  $(document).on("keyup", "#styleguide-query-input", function(evt){
+    var $input = $(this)
+    throttle(function(){
+      Irregardless.fetchGuides($input.val());
+    }, 1000 );
+  });
+  $(document).on("click", "[data-apply-tip]", function(evt){
+    var tip = $(this).closest(".tip-container").data('tipObject');
+    GoogleInterface.applyTip(tip, $(this).data('replacement'));
+    evt.stopPropagation();
+  });
+  $(document).on("click", "[data-get-tips]", function(){
+    Irregardless.fetchTips();
+  });
+  $(document).on("click", "[data-clear-highlights]", function(){
+    GoogleInterface.removeHighlights();
+  });
+  $(document).on("click", "[data-toggle-settings]", function(){
+    SideBar.toggleSettings();
+  });
+
+  $(document).on("click", "[data-save-guide-id]", function(){
+    Irregardless.selectedGuideId = parseInt($(this).data("save-guide-id"));
+    Irregardless.addGuide({id: Irregardless.selectedGuideId, name: $(this).data("save-guide-name")});
+    SideBar.renderGuides();
+    Irregardless.fetchTips();
+  });
+});
+
+
+
+
 
 </script>
