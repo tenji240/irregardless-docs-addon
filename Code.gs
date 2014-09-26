@@ -8,7 +8,7 @@ var Irregardless = new function() {
     GUIDES_ENDPOINT = HOST + "/style_guides?recommended=true&api_key=" + API_KEY,
     GUIDES_QUERY_ENDPOINT = HOST + "/style_guides?api_key=" + API_KEY;
 
-  this.fetchGuides = function(query){
+  this.fetchGuides = function(query) {
     var url;
     if (query) {
       url = GUIDES_QUERY_ENDPOINT + "&q=" + query;
@@ -58,26 +58,34 @@ function showSidebar() {
 }
 
 
+/***********************  Helper Functions  **************************/
+
+var searchDoc = function(string, fn) {
+  var body = DocumentApp.getActiveDocument().getBody(),
+      search = body.findText(string);
+
+  while (search !== null) {
+    fn(search);
+    // search for next match
+    search = body.findText(string, search);
+  }
+}
+
 /***********************  Interface Functions  **************************/
 // (Do these need to be global???)
 
 
-function getDocMatches(tip){
-    var body = DocumentApp.getActiveDocument().getBody(),
-        search = body.findText(tip.matched_string),
-      searchMatches = [];
-
-  while (search !== null) {
+function getDocMatches(tip) {
+  var searchMatches = [];
+  searchDoc(tip.matched_string, function(search) {
     searchMatches.push({
       startOffset: search.getStartOffset(),
       endOffset: search.getEndOffsetInclusive(),
       textEl: search.getElement().asText(),
-      ogBgColor: search.getElement().asText().getBackgroundColor(),
-      text: search.getElement().asText().getText()
+      ogBgColor: search.getElement().asText().getBackgroundColor() || '#FFFFFF', // Returns null if not set. Stupid.
+      text: tip.matched_string
     });
-    // search for next match
-    search = body.findText(tip.matched_string, search);
-  }
+  });
   return searchMatches;
 }
 
@@ -92,9 +100,18 @@ function highlight(tip) {
   return matches;
 }
 
-function applyTip(tip, replace){
-  var body = DocumentApp.getActiveDocument().getBody();
-  body.replaceText(tip.matched_string, replace);
+function unHighlight(matches) {
+  Logger.log(matches);
+  for (var i = 0; i < matches.length; i++) {
+    DocumentApp.getActiveDocument().getBody().editAsText().setBackgroundColor(matches[i].startOffset, matches[i].endOffset, matches[i].ogBgColor);
+  }
+}
+
+function applyTip(tip, replace, match){
+  searchDoc(tip.matched_string, function(search) {
+    search.getElement().asText().setBackgroundColor(search.getStartOffset(), search.getEndOffsetInclusive(), match.ogBgColor);
+    search.getElement().asText().replaceText(tip.matched_string, replace);
+  });
   return true;
 }
 

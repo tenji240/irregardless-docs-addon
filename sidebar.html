@@ -578,35 +578,44 @@ $(function() { SideBar = new SideBarObj(); }); // Init on DOM ready
     
 var GoogleInterface = new function() {
   var noOp = function() {};
-
-   this.highlight = function(tip) {
-      google.script.run
-          .withSuccessHandler(function(highlightMatch) {})
-          .withFailureHandler(
-            function() {
-              SideBar.showError();
-            })
-          .highlight(tip);
-   }
-   
-   function removeHighlights(){
-     //DocumentApp.getActiveDocument().getBody().editAsText().setBackgroundColor("#FFFFFF");
-     //.setBackgroundColor(match.startOffset, match.endOffset, '#FFFF00');
-   }
-
-   this.applyTip = function(tip, replace){
-     google.script.run
-          .withSuccessHandler(
-            function() {
-              //
-            })
-          .withFailureHandler(
-            function() {
-              SideBar.showError();
-            })
-          .applyTip(tip, replace);
-   }
+  var matches;
   
+  var matchForTip = function(tip) {
+    return $.grep(matches, function(match) { return match.text == tip.matched_string; })[0];
+  }
+  
+  this.highlight = function(tip) {
+    matches = [];
+    google.script.run
+        .withSuccessHandler(function(highlightedMatches) { matches = matches.concat(highlightedMatches); })
+        .withFailureHandler(
+          function() {
+            SideBar.showError();
+          })
+        .highlight(tip);
+  }
+   
+  this.removeHighlights = function () {
+    google.script.run
+        .withSuccessHandler(function() { })
+        .withFailureHandler(
+          function() { SideBar.showError(); })
+        .unHighlight(matches);
+  }
+
+  this.applyTip = function(tip, replace) {
+    var tipMatch = matchForTip(tip);
+    google.script.run
+        .withSuccessHandler(
+          function() {
+            matches = $.grep(matches, function(match) { return match.text != tip.matched_string; });
+          })
+        .withFailureHandler(
+          function() {
+            SideBar.showError();
+          })
+        .applyTip(tip, replace, tipMatch);
+  }
 }
 
   
@@ -691,9 +700,5 @@ $(function() {
     Irregardless.fetchTips();
   });
 });
-
-
-
-
 
 </script>
