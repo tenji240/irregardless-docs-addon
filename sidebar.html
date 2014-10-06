@@ -596,6 +596,7 @@ var GoogleInterface = new function() {
   }
    
   this.removeHighlights = function () {
+  console.log(JSON.stringify(matches));
     google.script.run
         .withSuccessHandler(function() { })
         .withFailureHandler(

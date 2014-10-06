@@ -61,13 +61,17 @@ function showSidebar() {
 /***********************  Helper Functions  **************************/
 
 var searchDoc = function(string, fn) {
-  var body = DocumentApp.getActiveDocument().getBody(),
-      search = body.findText(string);
-
-  while (search !== null) {
-    fn(search);
-    // search for next match
-    search = body.findText(string, search);
+  var element = null;
+  var i = 0;
+  while(element = DocumentApp.getActiveDocument().getBody().findElement(DocumentApp.ElementType.TEXT, element)) {
+    var textElement = element.getElement().asText();
+    search = textElement.findText(string); // TODO: This should match ONLY things bounded by word boundaries
+    while (search !== null) {
+      fn(i, search);
+      // search for next match
+      search = textElement.findText(string, search);
+    }
+    i++;
   }
 }
 
@@ -77,8 +81,9 @@ var searchDoc = function(string, fn) {
 
 function getDocMatches(tip) {
   var searchMatches = [];
-  searchDoc(tip.matched_string, function(search) {
+  searchDoc(tip.matched_string, function(textElementIndex, search) {
     searchMatches.push({
+      textElementIndex: textElementIndex,
       startOffset: search.getStartOffset(),
       endOffset: search.getEndOffsetInclusive(),
       textEl: search.getElement().asText(),
@@ -102,13 +107,18 @@ function highlight(tip) {
 
 function unHighlight(matches) {
   Logger.log(matches);
-  for (var i = 0; i < matches.length; i++) {
-    DocumentApp.getActiveDocument().getBody().editAsText().setBackgroundColor(matches[i].startOffset, matches[i].endOffset, matches[i].ogBgColor);
+  var textElement = null;
+  var elements = [];
+  while(textElement = DocumentApp.getActiveDocument().getBody().findElement(DocumentApp.ElementType.TEXT, textElement)) {
+    elements.push(textElement);
   }
+  for (var i = 0; i < matches.length; i++) {
+    elements[matches[i].textElementIndex].getElement().asText().setBackgroundColor(matches[i].startOffset, matches[i].endOffset, matches[i].ogBgColor);
+  } 
 }
 
 function applyTip(tip, replace, match){
-  searchDoc(tip.matched_string, function(search) {
+  searchDoc(tip.matched_string, function(textElementIndex, search) {
     search.getElement().asText().setBackgroundColor(search.getStartOffset(), search.getEndOffsetInclusive(), match.ogBgColor);
     search.getElement().asText().replaceText(tip.matched_string, replace);
   });
