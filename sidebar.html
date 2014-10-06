@@ -56,6 +56,10 @@
     -ms-transition: all .5s ease;
     transition: all .5s ease;
   }
+  .autorun-checkbox {
+    padding-top: 10px;
+    text-align: center;
+  }
   #cover-bg.showing {
     -moz-opacity: 1;
     -khtml-opacity: 1;
@@ -101,21 +105,19 @@
   .arrow {
     font-size: 0.8em;
   }
-  .settings-trigger {
+  .sg-settings-trigger {
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border: 1px solid #ccc;
-    margin-top: 14px;
-    padding: 4px;
-    border-radius: 4px;
     color: #666;
+    font-size: 20px;
+    float: right;
   }
-  .settings-trigger:hover {
+  .sg-settings-trigger:hover {
     text-decoration: none;
   }
-  .settings {
+  .sg-settings {
     position: absolute;
     left: 0;
     width: 100%;
@@ -134,7 +136,7 @@
     transition: all 0.5s ease;
     max-height: 0px
   }
-  .settings.showing {
+  .sg-settings.showing {
     max-height: 300px;
     overflow-y: scroll;
   }
@@ -332,17 +334,18 @@
 <div class="addon">
   <div class="sidebar">
     <div class="tips-container">
-      <div class="actions">
-        <div class="clearfix">
-          <a href="javascript://" class="btn btn-primary" data-get-tips>Get Tips</a>
-          <a href="javascript://" class="btn btn-secondary clear-button" data-clear-highlights>clear</a>
-        </div>
-        <a id="settings-trigger" class="settings-trigger" data-toggle-settings>
-          <span class="arrow">&#9660;</span> <span id="current-styleguide">Everything</span>
+      <div class="actions clearfix">
+        <a href="javascript://" class="btn btn-primary" data-get-tips>Get Tips</a>
+        <a href="javascript://" class="btn btn-secondary clear-button" data-clear-highlights>clear</a>
+        <a id="sg-settings-trigger" class="sg-settings-trigger" data-toggle-sg-settings>
+          &#x2699;
         </a>
       </div>
-      <div class="settings">
-        <input type="text" id="styleguide-query-input" />
+      <div class="sg-settings">
+        <div class="autorun-checkbox">
+          <input type="checkbox" id="toggle-autorun"/> Auto-run<br />
+        </div>
+        <input type="text" id="styleguide-query-input" placeholder="Search for a styleguide" />
         <ul class="unstyled styleguide-list">
         </ul>
         <div class="spinner">
@@ -352,7 +355,7 @@
       </div>
       <ul class="tips-list unstyled">
       </ul>
-      <div id="cover-bg" data-toggle-settings>
+      <div id="cover-bg" data-close-active-settings>
       </div>
     </div>
     <div class="footer">
@@ -473,9 +476,9 @@ var SideBarObj = function() {
    var $notice = $("#notice"),
         $tipsList = $('.tips-list'),
         $styleGuideList = $(".styleguide-list"),
-        $settings = $('.settings'),
-        $settingsTrigger = $("#settings-trigger"),
-        $currentGuide = $("#current-styleguide"),
+        $sgSettings = $('.sg-settings'),
+        $sgSettingsTrigger = $("#settings-trigger"),
+        $autoRunCheckBox = $("#toggle-autorun"),
         $coverBG = $('#cover-bg');
  
    // Could be further extracted
@@ -492,8 +495,7 @@ var SideBarObj = function() {
                       guide.id + " data-toggle-settings ><span class=\"check\">&#x2713;</span> " +
                       guide.name +
                     "</li>";
-           $currentGuide.html(guide.name);
-           $settingsTrigger.show();
+           $sgSettingsTrigger.show();
          } else {
            html = "<li data-save-guide-id=" + guide.id + " data-save-guide-name=\"" + guide.name + "\" data-toggle-settings>" +  guide.name + "</li>";
            $styleGuideList.append(html);
@@ -522,23 +524,28 @@ var SideBarObj = function() {
       this.showNoResults()
     }
   }
-  
-  this.toggleSettings = function() {
-    if($settings.is(":visible")){
-      $settings.removeClass('showing');
-      $coverBG.removeClass('showing');
-      setTimeout(function(){
-        $settings.hide();
-        $coverBG.hide();
-      },500);
-    } else {
-      $settings.show();
-      $coverBG.show();
-      setTimeout(function(){
-        $settings.addClass('showing');
-        $coverBG.addClass('showing');
-      },0);
+
+  this.closeActiveSettings = function(){
+    var $settingsEl;
+    if($sgSettings.is(":visible")){
+      $settingsEl = $sgSettings;
     }
+    $settingsEl.removeClass('showing');
+    $coverBG.removeClass('showing');
+    setTimeout(function(){
+      $settingsEl.hide();
+      $coverBG.hide();
+    },500);
+  }
+  
+  this.showSgSettings = function() {
+    $sgSettings.show();
+    $coverBG.show();
+    $autoRunCheckBox.prop('checked', Irregardless.isAutoRunEnabled);
+    setTimeout(function(){
+      $sgSettings.addClass('showing');
+      $coverBG.addClass('showing');
+    },0);
   }
   
   this.clearTips = function() {
@@ -596,7 +603,6 @@ var GoogleInterface = new function() {
   }
    
   this.removeHighlights = function () {
-  console.log(JSON.stringify(matches));
     google.script.run
         .withSuccessHandler(function() { })
         .withFailureHandler(
@@ -632,6 +638,7 @@ var Irregardless = new function() {
       
   this.selectedGuideId = 1;
   this.guides = [];
+  this.isAutoRunEnabled = false;
   
   this.fetchTips = function() {
     SideBar.clearTips();
@@ -672,6 +679,17 @@ var Irregardless = new function() {
 $(function() {
   Irregardless.fetchTips();
   Irregardless.fetchGuides();
+  
+  var autoRun = function(){
+    setTimeout(function(){
+      if(Irregardless.isAutoRunEnabled){
+        Irregardless.fetchTips();
+      }
+      autoRun();
+    }, 30000);
+  }
+  
+  autoRun();
 
   $(document).on("keyup", "#styleguide-query-input", function(evt){
     var $input = $(this)
@@ -690,8 +708,15 @@ $(function() {
   $(document).on("click", "[data-clear-highlights]", function(){
     GoogleInterface.removeHighlights();
   });
-  $(document).on("click", "[data-toggle-settings]", function(){
-    SideBar.toggleSettings();
+  $(document).on("click", "[data-toggle-sg-settings]", function(){
+    SideBar.showSgSettings();
+  });
+  $(document).on("click", "[data-close-active-settings]", function(){
+    SideBar.closeActiveSettings();
+  });
+
+  $(document).on("click", "#toggle-autorun", function(){
+    Irregardless.isAutoRunEnabled = $(this).is(":checked");
   });
 
   $(document).on("click", "[data-save-guide-id]", function(){

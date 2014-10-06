@@ -106,7 +106,6 @@ function highlight(tip) {
 }
 
 function unHighlight(matches) {
-  Logger.log(matches);
   var textElement = null;
   var elements = [];
   while(textElement = DocumentApp.getActiveDocument().getBody().findElement(DocumentApp.ElementType.TEXT, textElement)) {
@@ -114,7 +113,7 @@ function unHighlight(matches) {
   }
   for (var i = 0; i < matches.length; i++) {
     elements[matches[i].textElementIndex].getElement().asText().setBackgroundColor(matches[i].startOffset, matches[i].endOffset, matches[i].ogBgColor);
-  } 
+  }
 }
 
 function applyTip(tip, replace, match){
