@@ -417,7 +417,7 @@ Tip.prototype.truncate = function (string, length){
 }
 
 Tip.prototype.render = function (){
-  var beginning = "<li class=\"tip-container\">"+
+  var beginning = "<li class=\"tip-container\" data-tip-container>"+
     "<div class=\"creator\">"+
       "<a href='http://irregardless.ly/#!/profile/" + this.tip.creator.id + "' target='_blank'>"+
         "<img src=\""+ this.tip.creator.mugshot_url+"\" title=\""+ this.tip.creator.name.split(' ')[0] + "\" alt=\""+ this.tip.creator.name.split(' ')[0] + "\" />"+
@@ -623,6 +623,13 @@ var GoogleInterface = new function() {
           })
         .applyTip(tip, replace, tipMatch);
   }
+  
+  this.scrollToTip = function(tip) {
+    google.script.run
+        .withSuccessHandler(noOp)
+        .withFailureHandler(noOp)
+        .scrollToTip(tip);
+  }
 }
 
   
@@ -717,6 +724,11 @@ $(function() {
 
   $(document).on("click", "#toggle-autorun", function(){
     Irregardless.isAutoRunEnabled = $(this).is(":checked");
+  });
+  
+  $(document).on("click", "[data-tip-container]", function(){
+    var tip = $(this).data('tipObject');
+    GoogleInterface.scrollToTip(tip);
   });
 
   $(document).on("click", "[data-save-guide-id]", function(){

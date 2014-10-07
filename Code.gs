@@ -131,3 +131,13 @@ function fetchGuides(query) {
 function fetchTips(guideId) {
   return Irregardless.fetchTips(guideId);
 }
+
+function scrollToTip(tip) {
+  var matches = getDocMatches(tip),
+      match = matches[0];
+  Logger.log(match);
+  if(match){
+    var position = DocumentApp.getActiveDocument().newPosition(match.textEl, 0);
+    DocumentApp.getActiveDocument().setCursor(position);
+  }
+}
