@@ -65,7 +65,7 @@ var searchDoc = function(string, fn) {
   var i = 0;
   while(element = DocumentApp.getActiveDocument().getBody().findElement(DocumentApp.ElementType.TEXT, element)) {
     var textElement = element.getElement().asText();
-    search = textElement.findText(string); // TODO: This should match ONLY things bounded by word boundaries
+    search = textElement.findText("\\b" + string + "\\b");
     while (search !== null) {
       fn(i, search);
       // search for next match
