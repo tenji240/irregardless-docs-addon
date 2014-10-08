@@ -107,12 +107,10 @@
   }
   .sg-settings-trigger {
     display: inline-block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
     color: #666;
-    font-size: 20px;
+    font-size: 40px;
     float: right;
+    padding-top: 4px;
   }
   .sg-settings-trigger:hover {
     text-decoration: none;
@@ -139,6 +137,10 @@
   .sg-settings.showing {
     max-height: 300px;
     overflow-y: scroll;
+  }
+  .settings-actions {
+    padding-top: 12px;
+    text-align: center;
   }
   #styleguide-query-input {
     margin: 10px;
@@ -218,6 +220,9 @@
     overflow-y: scroll;
     padding-bottom: 35px;
     box-sizing: border-box;
+  }
+  .tips-container.settings {
+    overflow-y: hidden;
   }
   .tip-container {
     position: relative;
@@ -336,12 +341,16 @@
     <div class="tips-container">
       <div class="actions clearfix">
         <a href="javascript://" class="btn btn-primary" data-get-tips>Get Tips</a>
-        <a href="javascript://" class="btn btn-secondary clear-button" data-clear-highlights>clear</a>
+        <a href="javascript://" class="btn btn-secondary clear-button" data-clear-highlights>Clear</a>
         <a id="sg-settings-trigger" class="sg-settings-trigger" data-toggle-sg-settings>
           &#x2699;
         </a>
       </div>
       <div class="sg-settings">
+        <div class="settings-actions">
+          <a href="javascript://" class="btn btn-primary" data-close-active-settings>Save</a>
+          <a href="javascript://" class="btn btn-secondary" data-close-active-settings>Close</a>
+        </div>
         <div class="autorun-checkbox">
           <input type="checkbox" id="toggle-autorun"/> Auto-run<br />
         </div>
@@ -424,7 +433,7 @@ Tip.prototype.render = function (){
       "</a>"+
     "</div>"+
     "<div class=\"text-snippet\">"+
-      this.tip.text_snippet +
+      this.tip.text_snippet + "<a href=\"javascript://\" data-find-tip> Find</a>" +
     "</div>"+
     "<div class=\"tip clearfix\">"+
       this.replacementHtml() +
@@ -479,6 +488,7 @@ var SideBarObj = function() {
         $sgSettings = $('.sg-settings'),
         $sgSettingsTrigger = $("#settings-trigger"),
         $autoRunCheckBox = $("#toggle-autorun"),
+        $tipsCon = $('.tips-container'),
         $coverBG = $('#cover-bg');
  
    // Could be further extracted
@@ -529,9 +539,12 @@ var SideBarObj = function() {
     var $settingsEl;
     if($sgSettings.is(":visible")){
       $settingsEl = $sgSettings;
+    } else {
+      return;
     }
     $settingsEl.removeClass('showing');
     $coverBG.removeClass('showing');
+    $tipsCon.removeClass('settings');
     setTimeout(function(){
       $settingsEl.hide();
       $coverBG.hide();
@@ -541,6 +554,7 @@ var SideBarObj = function() {
   this.showSgSettings = function() {
     $sgSettings.show();
     $coverBG.show();
+    $tipsCon.addClass('settings');
     $autoRunCheckBox.prop('checked', Irregardless.isAutoRunEnabled);
     setTimeout(function(){
       $sgSettings.addClass('showing');
@@ -553,12 +567,12 @@ var SideBarObj = function() {
   }
   
   this.showLoading = function () {
-    $notice.html("Loading...").show();
+    $notice.html("<img src='http://irregardless.ly/assets/spinner.gif' />").show();
   }
   
   this.showLoadingGuides = function () {
     $styleGuideList.empty();
-    $styleGuideList.append("<li class='centered muted'>Loading...</li>");
+    this.showLoading();
   }
 
   this.showNoResults = function(){
@@ -714,6 +728,8 @@ $(function() {
   });
   $(document).on("click", "[data-clear-highlights]", function(){
     GoogleInterface.removeHighlights();
+    SideBar.clearTips();
+    SideBar.showInstructions();
   });
   $(document).on("click", "[data-toggle-sg-settings]", function(){
     SideBar.showSgSettings();
@@ -726,8 +742,8 @@ $(function() {
     Irregardless.isAutoRunEnabled = $(this).is(":checked");
   });
   
-  $(document).on("click", "[data-tip-container]", function(){
-    var tip = $(this).data('tipObject');
+  $(document).on("click", "[data-find-tip]", function(){
+    var tip = $(this).closest("[data-tip-container]").data('tipObject');
     GoogleInterface.scrollToTip(tip);
   });
 
