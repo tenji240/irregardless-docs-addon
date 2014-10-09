@@ -39,8 +39,8 @@
     position: static;
   }
   .autorun-checkbox {
-    padding-top: 10px;
-    padding-left: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
   }
   .actions {
     border-bottom: 1px solid #ddd;
@@ -109,6 +109,14 @@
   }
   .settings.showing {
     opacity: 1;
+  }
+  .help-icon {
+    display: inline-block;
+    color: #777;
+    font-weight: bold;
+    padding: 0 4px;
+    font-size: 14px;
+    cursor: pointer;
   }
   #styleguide-query-input {
     margin: 10px;
@@ -307,6 +315,91 @@
     margin: 0;
     text-align: center;
   }
+  
+  /*
+  Tipr 1.0.1
+  Copyright (c) 2013 Tipue
+  Tipr is released under the MIT License
+  http://www.tipue.com/tipr
+*/
+  
+  
+  .tipr_content
+  {
+       font: 13px/1.7 'Helvetica Neue', Helvetica, Arial, sans-serif;
+       color: #333; 
+       background-color: #fff;
+       color: #333;
+       padding: 9px 17px;
+  }
+  .tipr_container_bottom
+  {
+       display: none;
+       position: absolute;
+       margin-top: 13px;
+       z-index: 1000;
+  }
+  .tipr_container_top
+  {
+       display: none;
+       position: absolute;
+       margin-top: -75px;
+       z-index: 1000;
+  }
+  .tipr_point_top, .tipr_point_bottom 
+  {
+       position: relative;
+      background: #fff;
+      border: 1px solid #dcdcdc;
+  }
+  .tipr_point_top:after, .tipr_point_top:before
+  {
+      position: absolute;
+      pointer-events: none;
+      border: solid transparent;
+      top: 100%;
+      content: "";
+      height: 0;
+      width: 0;
+  }
+  .tipr_point_top:after
+  {
+      border-top-color: #fff;
+      border-width: 8px;
+      left: 50%;
+      margin-left: -8px;
+  }
+  .tipr_point_top:before 
+  {
+      border-top-color: #dcdcdc;
+      border-width: 9px;
+      left: 50%;
+      margin-left: -9px;
+  }
+  .tipr_point_bottom:after, .tipr_point_bottom:before
+  {
+      position: absolute;
+      pointer-events: none;
+      border: solid transparent;
+      bottom: 100%;
+      content: "";
+      height: 0;
+      width: 0;
+  }
+  .tipr_point_bottom:after
+  {
+      border-bottom-color: #fff;
+      border-width: 8px;
+      left: 50%;
+      margin-left: -8px;
+  }
+  .tipr_point_bottom:before 
+  {
+      border-bottom-color: #dcdcdc;
+      border-width: 9px;
+      left: 50%;
+      margin-left: -9px;
+  }
 </style>
 
 <div class="addon">
@@ -330,7 +423,8 @@
         <a href="javascript://" class="btn btn-secondary" data-close-active-settings>Close</a>
       </div>
       <div class="autorun-checkbox">
-        <input type="checkbox" id="toggle-autorun"/>Enable Auto-run
+        <input type="checkbox" id="toggle-autorun" name="autorun"/> <label for="autorun">Enable Auto-run</label>
+        <div class="help-icon" data-tool-tip="With autorun, Irregardless.ly will automatically check your writing every 30 seconds.">&#x3f;</div>
       </div>
       <input type="text" id="styleguide-query-input" placeholder="Search for a styleguide" />
       <ul class="unstyled styleguide-list">
@@ -665,6 +759,8 @@ $(function() {
   }
   
   autoRun();
+  
+  $("[data-tool-tip]").tipr();
 
   $(document).on("keyup", "#styleguide-query-input", function(evt){
     var $input = $(this)
@@ -709,5 +805,54 @@ $(function() {
     Irregardless.fetchTips();
   });
 });
+
+/*
+Tipr 1.0.1
+Copyright (c) 2013 Tipue
+Tipr is released under the MIT License
+http://www.tipue.com/tipr
+*/
+
+
+(function($) {
+
+   $.fn.tipr = function(options) {
+
+        var set = $.extend( {
+
+             'speed'        : 200,
+             'mode'         : 'bottom'
+
+        }, options);
+
+        return this.each(function() {
+
+             var tipr_cont = '.tipr_container_' + set.mode;
+
+             $(this).hover(
+                  function ()
+                  {
+                       var out = '<div class="tipr_container_' + set.mode + '"><div class="tipr_point_' + set.mode + '"><div class="tipr_content">' + $(this).attr('data-tool-tip') + '</div></div></div>';
+
+                       $(this).append(out);
+
+                       var w_t = $(tipr_cont).outerWidth();
+                       var w_e = $(this).width();
+                       var m_l = (w_e / 2) - (w_t / 2);
+
+                       $(tipr_cont).css('margin-left', m_l + 'px');
+                       $(this).removeAttr('title');
+                       $(tipr_cont).fadeIn(set.speed);
+                  },
+                  function ()
+                  {
+                       $(tipr_cont).remove();
+                  }
+             );
+
+        });
+   };
+
+})(jQuery);
 
 </script>

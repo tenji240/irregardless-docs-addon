@@ -53,7 +53,7 @@ function onInstall(e) {
 
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('sidebar')
-      .setTitle('Irregardless');
+      .setTitle('Irregardless.ly');
   DocumentApp.getUi().showSidebar(ui);
 }
 
