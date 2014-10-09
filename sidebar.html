@@ -38,32 +38,9 @@
     padding: 0;
     position: static;
   }
-  #cover-bg {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 99;
-    background: rgba(36, 31, 31, 0.75);
-    display: none;
-    -moz-opacity: 0;
-    -khtml-opacity: 0;
-    opacity: 0;
-    -moz-transition: all .5s ease;
-    -webkit-transition: all .5s ease;
-    -o-transition: all .5s ease;
-    -ms-transition: all .5s ease;
-    transition: all .5s ease;
-  }
   .autorun-checkbox {
     padding-top: 10px;
-    text-align: center;
-  }
-  #cover-bg.showing {
-    -moz-opacity: 1;
-    -khtml-opacity: 1;
-    opacity: 1;
+    padding-left: 10px;
   }
   .actions {
     border-bottom: 1px solid #ddd;
@@ -105,23 +82,17 @@
   .arrow {
     font-size: 0.8em;
   }
-  .sg-settings-trigger {
+  .settings-trigger {
     display: inline-block;
     color: #666;
     font-size: 40px;
     float: right;
     padding-top: 4px;
   }
-  .sg-settings-trigger:hover {
+  .settings-trigger:hover {
     text-decoration: none;
   }
-  .sg-settings {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    top: 34px;
-    z-index: 100;
-    display: none;
+  .settings {
     margin-bottom: 12px;
     overflow: hidden;
     border-bottom: 1px solid #aaa;
@@ -132,15 +103,10 @@
     -o-transition: all 0.5s ease;
     -ms-transition: all 0.5s ease;
     transition: all 0.5s ease;
-    max-height: 0px
+    opacity: 0;
   }
-  .sg-settings.showing {
-    max-height: 300px;
-    overflow-y: scroll;
-  }
-  .settings-actions {
-    padding-top: 12px;
-    text-align: center;
+  .settings.showing {
+    opacity: 1;
   }
   #styleguide-query-input {
     margin: 10px;
@@ -220,9 +186,14 @@
     overflow-y: scroll;
     padding-bottom: 35px;
     box-sizing: border-box;
+    -moz-transition: all .5s ease;
+    -webkit-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    -ms-transition: all .5s ease;
+    transition: all .5s ease;
   }
-  .tips-container.settings {
-    overflow-y: hidden;
+  .tips-container.hidden {
+    margin-left: -100%;
   }
   .tip-container {
     position: relative;
@@ -342,30 +313,26 @@
       <div class="actions clearfix">
         <a href="javascript://" class="btn btn-primary" data-get-tips>Get Tips</a>
         <a href="javascript://" class="btn btn-secondary clear-button" data-clear-highlights>Clear</a>
-        <a id="sg-settings-trigger" class="sg-settings-trigger" data-toggle-sg-settings>
+        <a id="settings-trigger" class="settings-trigger" data-toggle-settings>
           &#x2699;
         </a>
-      </div>
-      <div class="sg-settings">
-        <div class="settings-actions">
-          <a href="javascript://" class="btn btn-primary" data-close-active-settings>Save</a>
-          <a href="javascript://" class="btn btn-secondary" data-close-active-settings>Close</a>
-        </div>
-        <div class="autorun-checkbox">
-          <input type="checkbox" id="toggle-autorun"/> Auto-run<br />
-        </div>
-        <input type="text" id="styleguide-query-input" placeholder="Search for a styleguide" />
-        <ul class="unstyled styleguide-list">
-        </ul>
-        <div class="spinner">
-        </div>
       </div>
       <div id="notice" class="notice">
       </div>
       <ul class="tips-list unstyled">
       </ul>
-      <div id="cover-bg" data-close-active-settings>
+    </div>     
+    <div class="settings">
+      <div class="actions">
+        <a href="javascript://" class="btn btn-primary" data-close-active-settings>Save</a>
+        <a href="javascript://" class="btn btn-secondary" data-close-active-settings>Close</a>
       </div>
+      <div class="autorun-checkbox">
+        <input type="checkbox" id="toggle-autorun"/>Enable Auto-run
+      </div>
+      <input type="text" id="styleguide-query-input" placeholder="Search for a styleguide" />
+      <ul class="unstyled styleguide-list">
+      </ul>
     </div>
     <div class="footer">
       <a href="http://irregardless.ly" target="_blank">
@@ -485,11 +452,10 @@ var SideBarObj = function() {
    var $notice = $("#notice"),
         $tipsList = $('.tips-list'),
         $styleGuideList = $(".styleguide-list"),
-        $sgSettings = $('.sg-settings'),
+        $sgSettings = $('.settings'),
         $sgSettingsTrigger = $("#settings-trigger"),
         $autoRunCheckBox = $("#toggle-autorun"),
-        $tipsCon = $('.tips-container'),
-        $coverBG = $('#cover-bg');
+        $tipsCon = $('.tips-container');
  
    // Could be further extracted
    this.renderGuides = function(guides) {
@@ -534,32 +500,18 @@ var SideBarObj = function() {
       this.showNoResults()
     }
   }
-
+  
   this.closeActiveSettings = function(){
-    var $settingsEl;
-    if($sgSettings.is(":visible")){
-      $settingsEl = $sgSettings;
-    } else {
-      return;
-    }
-    $settingsEl.removeClass('showing');
-    $coverBG.removeClass('showing');
-    $tipsCon.removeClass('settings');
-    setTimeout(function(){
-      $settingsEl.hide();
-      $coverBG.hide();
-    },500);
+    $sgSettings.removeClass('showing');
+    $tipsCon.removeClass('hidden');
   }
   
   this.showSgSettings = function() {
-    $sgSettings.show();
-    $coverBG.show();
-    $tipsCon.addClass('settings');
+    $tipsCon.addClass('hidden');
     $autoRunCheckBox.prop('checked', Irregardless.isAutoRunEnabled);
     setTimeout(function(){
       $sgSettings.addClass('showing');
-      $coverBG.addClass('showing');
-    },0);
+    }, 100);
   }
   
   this.clearTips = function() {
@@ -572,7 +524,7 @@ var SideBarObj = function() {
   
   this.showLoadingGuides = function () {
     $styleGuideList.empty();
-    this.showLoading();
+    $styleGuideList.append("<li><div class=\"centered\"><img src='http://irregardless.ly/assets/spinner.gif' /></div></li>");
   }
 
   this.showNoResults = function(){
@@ -657,7 +609,7 @@ var Irregardless = new function() {
       GUIDES_ENDPOINT = HOST + "/style_guides?recommended=true&api_key=" + API_KEY,
       GUIDES_QUERY_ENDPOINT = HOST + "/style_guides?api_key=" + API_KEY;
       
-  this.selectedGuideId = 1;
+  this.selectedGuideId = 11;
   this.guides = [];
   this.isAutoRunEnabled = false;
   
@@ -731,7 +683,7 @@ $(function() {
     SideBar.clearTips();
     SideBar.showInstructions();
   });
-  $(document).on("click", "[data-toggle-sg-settings]", function(){
+  $(document).on("click", "[data-toggle-settings]", function(){
     SideBar.showSgSettings();
   });
   $(document).on("click", "[data-close-active-settings]", function(){
@@ -751,6 +703,7 @@ $(function() {
     Irregardless.selectedGuideId = parseInt($(this).data("save-guide-id"));
     Irregardless.addGuide({id: Irregardless.selectedGuideId, name: $(this).data("save-guide-name")});
     SideBar.renderGuides();
+    $("#styleguide-query-input").val('');
     Irregardless.fetchTips();
   });
 });
