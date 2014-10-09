@@ -40,7 +40,6 @@
   }
   .autorun-checkbox {
     padding: 10px;
-    border-bottom: 1px solid #ccc;
   }
   .actions {
     border-bottom: 1px solid #ddd;
@@ -109,6 +108,14 @@
   }
   .settings.showing {
     opacity: 1;
+  }
+  .setting-separator {
+    border: 1px solid #ccc;
+    margin: 10px 0;
+  }
+  .styleguide-explanation {
+    padding: 10px;
+    color: #888;
   }
   .help-icon {
     display: inline-block;
@@ -419,16 +426,24 @@
     </div>     
     <div class="settings">
       <div class="actions">
-        <a href="javascript://" class="btn btn-primary" data-close-active-settings>Save</a>
-        <a href="javascript://" class="btn btn-secondary" data-close-active-settings>Close</a>
+        <a href="javascript://" class="btn btn-primary" data-save-settings>Save</a>
+        <a href="javascript://" class="btn btn-secondary" data-close-settings>Close</a>
       </div>
       <div class="autorun-checkbox">
         <input type="checkbox" id="toggle-autorun" name="autorun"/> <label for="autorun">Enable Auto-run</label>
         <div class="help-icon" data-tool-tip="With autorun, Irregardless.ly will automatically check your writing every 30 seconds.">&#x3f;</div>
       </div>
-      <input type="text" id="styleguide-query-input" placeholder="Search for a styleguide" />
-      <ul class="unstyled styleguide-list">
-      </ul>
+      <div class="setting-separator"></div>
+      <div class="styleguide-settings">
+        <div class="styleguide-explanation">
+          Choose a style guide to test your writing against.
+        </div>
+        <div class="styleguide-search">
+          <input type="text" id="styleguide-query-input" placeholder="Search for a styleguide" />
+        </div>
+        <ul class="unstyled styleguide-list">
+        </ul>
+      </div>
     </div>
     <div class="footer">
       <a href="http://irregardless.ly" target="_blank">
@@ -548,8 +563,8 @@ var SideBarObj = function() {
    var $notice = $("#notice"),
         $tipsList = $('.tips-list'),
         $styleGuideList = $(".styleguide-list"),
-        $sgSettings = $('.settings'),
-        $sgSettingsTrigger = $("#settings-trigger"),
+        $settings = $('.settings'),
+        $settingsTrigger = $("#settings-trigger"),
         $autoRunCheckBox = $("#toggle-autorun"),
         $tipsCon = $('.tips-container');
  
@@ -567,13 +582,12 @@ var SideBarObj = function() {
                       guide.id + " data-toggle-settings ><span class=\"check\">&#x2713;</span> " +
                       guide.name +
                     "</li>";
-           $sgSettingsTrigger.show();
+           $styleGuideList.append(chosenGuideHtml);
          } else {
            html = "<li data-save-guide-id=" + guide.id + " data-save-guide-name=\"" + guide.name + "\" data-toggle-settings>" +  guide.name + "</li>";
            $styleGuideList.append(html);
          }
        }
-       $styleGuideList.prepend(chosenGuideHtml);
      } else {
        $styleGuideList.append("<li class='muted centered'> No results...</li>");
      }
@@ -597,16 +611,16 @@ var SideBarObj = function() {
     }
   }
   
-  this.closeActiveSettings = function(){
-    $sgSettings.removeClass('showing');
+  this.closeSettings = function(){
+    $settings.removeClass('showing');
     $tipsCon.removeClass('hidden');
   }
   
-  this.showSgSettings = function() {
+  this.showSettings = function() {
     $tipsCon.addClass('hidden');
     $autoRunCheckBox.prop('checked', Irregardless.isAutoRunEnabled);
     setTimeout(function(){
-      $sgSettings.addClass('showing');
+      $settings.addClass('showing');
     }, 100);
   }
   
@@ -782,10 +796,14 @@ $(function() {
     SideBar.showInstructions();
   });
   $(document).on("click", "[data-toggle-settings]", function(){
-    SideBar.showSgSettings();
+    SideBar.showSettings();
   });
-  $(document).on("click", "[data-close-active-settings]", function(){
-    SideBar.closeActiveSettings();
+  $(document).on("click", "[data-close-settings]", function(){
+    SideBar.closeSettings();
+  });
+  $(document).on("click", "[data-save-settings]", function(){
+    SideBar.closeSettings();
+    Irregardless.fetchTips();
   });
 
   $(document).on("click", "#toggle-autorun", function(){
@@ -802,7 +820,6 @@ $(function() {
     Irregardless.addGuide({id: Irregardless.selectedGuideId, name: $(this).data("save-guide-name")});
     SideBar.renderGuides();
     $("#styleguide-query-input").val('');
-    Irregardless.fetchTips();
   });
 });
 
