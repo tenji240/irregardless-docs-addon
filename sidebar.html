@@ -692,6 +692,7 @@ var GoogleInterface = new function() {
         .withSuccessHandler(
           function() {
             matches = $.grep(matches, function(match) { return match.text != tip.matched_string; });
+            Irregardless.fetchTips()
           })
         .withFailureHandler(
           function() {
