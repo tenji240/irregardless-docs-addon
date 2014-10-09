@@ -485,7 +485,7 @@ Tip.prototype.replacementHtml = function (){
     }
     html += "</ul>";
   } else {
-   html += "<div class=\"muted replacements-label\"> Don't Use </div>";
+    html += " <a title=\"Click to delete\" href=\"javascript://\" data-replacement='' data-apply-tip>" + "Don't Use" + "</a>";
   }
   return html + "</div>";
 }
