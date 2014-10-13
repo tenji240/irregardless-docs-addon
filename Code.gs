@@ -94,13 +94,15 @@ function getDocMatches(tip) {
   return searchMatches;
 }
 
-function highlight(tip) {
+function highlight(tip, color) {
   var matches = getDocMatches(tip),
       match;
 
+  color = color || '#FFFF00';
+
   for(var i = 0; i < matches.length; i++){
     match = matches[i];
-    match.textEl.setBackgroundColor(match.startOffset, match.endOffset, '#FFFF00');
+    match.textEl.setBackgroundColor(match.startOffset, match.endOffset, color);
   }
   return matches;
 }
@@ -132,11 +134,16 @@ function fetchTips(guideId) {
   return Irregardless.fetchTips(guideId);
 }
 
-function scrollToTip(tip) {
+//highlights the tip matches in red, and reverts the red higlight on lastScrollTip
+function scrollToTip(tip, lastScrollTip) {
   var matches = getDocMatches(tip),
       match = matches[0];
+  if(lastScrollTip){
+    highlight(lastScrollTip);
+  }
   if(match){
     var position = DocumentApp.getActiveDocument().newPosition(match.textEl, 0);
     DocumentApp.getActiveDocument().setCursor(position);
+    highlight(tip, '#f49898');
   }
 }
