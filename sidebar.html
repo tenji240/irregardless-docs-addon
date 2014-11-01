@@ -453,7 +453,7 @@
     <div class="footer">
       <a href="http://irregardless.ly" target="_blank">
         <img alt="Add-on logo" class="logo" width="27" height="27" src="http://irregardless.ly/assets/favicon.png" />
-        Writing Tips by <span class="brand">Irregardless</span>
+        Writing tips by <span class="brand">Irregardless.ly</span>
       </a>
     </div>
   </div>
@@ -484,7 +484,7 @@ var Tip = function(tip, fullText) {
 Tip.prototype.replacementHtml = function (){
   var html = "<div class=\"replacements\">";
   if(this.tip.replacements && this.tip.replacements.length){
-    html += "<div class=\"muted replacements-label\">Instead Try:</div><ul>";
+    html += "<div class=\"muted replacements-label\">Replace it with:</div><ul>";
     for(var i=0; i < this.tip.replacements.length; i++){
       html += "<li>" + " <a title=\"Click to apply\" href=\"javascript://\" data-replacement=\"" + this.tip.replacements[i] + "\" data-apply-tip>" + this.tip.replacements[i] + "</a>" + "</li>";
     }
@@ -536,17 +536,14 @@ Tip.prototype.render = function (){
 Tip.prototype.prepareSnippet = function(fullText, tip){
   //match will either be in the tip's `match_string`,
   //or the tips `matched_string`
-  var match, snippet, indexOfM;
-  if(fullText.indexOf(tip.match_string) !== -1){
-    match = tip.match_string;
-  } else {
-    match = tip.matched_string;
-  }
+  var regex = new RegExp("\\b" + tip.matched_string + "\\b", 'ig')
+    , snippet
+    , indexOfM;
   //if text is short, snippet is the text
   if(fullText.length < 100) {
     snippet = fullText;
   } else {
-    indexOfM = fullText.indexOf(match);
+    indexOfM = regex.exec(fullText).index
     //match is in the first 50 characters
     if(indexOfM < 50){
       snippet = fullText.slice(0, 100) + "...";
@@ -558,7 +555,7 @@ Tip.prototype.prepareSnippet = function(fullText, tip){
      snippet = fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
     }
   }
-  return snippet.replace(match, "<span class=\"match-content\">" + match +"</span>");
+  return snippet.replace(regex, "<span class=\"match-content\">" + tip.matched_string +"</span>");
 }
 
 
@@ -882,3 +879,4 @@ http://www.tipue.com/tipr
 })(jQuery);
 
 </script>
+

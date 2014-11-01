@@ -33,7 +33,6 @@ var Irregardless = new function() {
     };
     var response = UrlFetchApp.fetch(MATCH_ENDPOINT, params),
         json = response.getContentText();
-    
     return { fullText: text,
             tips: JSON.parse(json)};
   }
@@ -60,16 +59,22 @@ function showSidebar() {
 
 /***********************  Helper Functions  **************************/
 
+var regexForString = function(string) {
+  return new RegExp('\\b' + string + '\\b','gi');
+};
+
 var searchDoc = function(string, fn) {
   var element = null;
   var i = 0;
+  var regex = regexForString(string);
+  var search
   while(element = DocumentApp.getActiveDocument().getBody().findElement(DocumentApp.ElementType.TEXT, element)) {
     var textElement = element.getElement().asText();
-    search = textElement.findText("\\b" + string + "\\b");
-    while (search !== null) {
-      fn(i, search);
+    var text = textElement.getText();
+    if (search = regex.exec(text)) {
+      fn(i, search, textElement);
       // search for next match
-      search = textElement.findText(string, search);
+      return;
     }
     i++;
   }
@@ -81,13 +86,13 @@ var searchDoc = function(string, fn) {
 
 function getDocMatches(tip) {
   var searchMatches = [];
-  searchDoc(tip.matched_string, function(textElementIndex, search) {
+  searchDoc(tip.matched_string, function(textElementIndex, search, textElement) {
     searchMatches.push({
       textElementIndex: textElementIndex,
-      startOffset: search.getStartOffset(),
-      endOffset: search.getEndOffsetInclusive(),
-      textEl: search.getElement().asText(),
-      ogBgColor: search.getElement().asText().getBackgroundColor() || '#FFFFFF', // Returns null if not set. Stupid.
+      startOffset: search.index,
+      endOffset: search.index + search[0].length-1,
+      textEl: textElement,
+      ogBgColor: textElement.getBackgroundColor(search.index) || '#FFFFFF', // Returns null if not set. Stupid.
       text: tip.matched_string
     });
   });
@@ -119,9 +124,11 @@ function unHighlight(matches) {
 }
 
 function applyTip(tip, replace, match){
-  searchDoc(tip.matched_string, function(textElementIndex, search) {
-    search.getElement().asText().setBackgroundColor(search.getStartOffset(), search.getEndOffsetInclusive(), match.ogBgColor);
-    search.getElement().asText().replaceText(tip.matched_string, replace);
+  searchDoc(tip.matched_string, function(textElementIndex, search, textElement) {
+    textElement.setBackgroundColor(search.index, search.index + search[0].length, match.ogBgColor);
+    textElement.deleteText(search.index, search.index + search[0].length-1);
+    textElement.insertText(search.index, replace);
+//    textElement.replaceText(regexForString(tip.matched_string), replace);
   });
   return true;
 }
@@ -147,3 +154,4 @@ function scrollToTip(tip, lastScrollTip) {
     highlight(tip, '#f49898');
   }
 }
+
