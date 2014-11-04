@@ -97,10 +97,6 @@ var searchDoc = function(string, fn) {
 function getDocMatches(tip) {
   var searchMatches = [];
   searchDoc(tip.matched_string, function(textElementIndex, search, textElement) {
-    Logger.log('----');
-    Logger.log(textElement);
-    Logger.log(search);
-    
     searchMatches.push({
       textElementIndex: textElementIndex,
       startOffset: search.index,
