@@ -42,7 +42,7 @@ var Irregardless = new function() {
 /***********************  Main - Initialize the sidebar  **************************/
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
-      .addItem('Start', 'showSidebar')
+      .addItem('Get Tips', 'showSidebar')
       .addToUi();
 }
 
@@ -60,8 +60,15 @@ function showSidebar() {
 /***********************  Helper Functions  **************************/
 
 var regexForString = function(string) {
-  return new RegExp('\\b' + string + '\\b','gi');
+  return new RegExp('(\\s|\\b)' + string + '(\\s|\\b)','gi');
 };
+
+function leadingWhiteSpaceCount(string) {
+  for (var result = 0, characterCode = string.charCodeAt(0); 32 == characterCode || characterCode > 8 && characterCode < 14 && characterCode != 11 && characterCode != 12;) {
+    characterCode = string.charCodeAt(++result);
+  }
+  return result;
+}
 
 var searchDoc = function(string, fn) {
   var element = null;
@@ -72,13 +79,16 @@ var searchDoc = function(string, fn) {
     var textElement = element.getElement().asText();
     var text = textElement.getText();
     if (search = regex.exec(text)) {
+      var trimmedChars = leadingWhiteSpaceCount(search[0]);
+      search.index += trimmedChars;
+      search[0] = search[0].substring(trimmedChars).trim();
       fn(i, search, textElement);
-      // search for next match
+      // Only return first match
       return;
     }
     i++;
   }
-}
+};
 
 /***********************  Interface Functions  **************************/
 // (Do these need to be global???)
@@ -87,6 +97,10 @@ var searchDoc = function(string, fn) {
 function getDocMatches(tip) {
   var searchMatches = [];
   searchDoc(tip.matched_string, function(textElementIndex, search, textElement) {
+    Logger.log('----');
+    Logger.log(textElement);
+    Logger.log(search);
+    
     searchMatches.push({
       textElementIndex: textElementIndex,
       startOffset: search.index,
@@ -97,20 +111,20 @@ function getDocMatches(tip) {
     });
   });
   return searchMatches;
-}
+};
 
 function highlight(tip, color) {
   var matches = getDocMatches(tip),
       match;
 
-  color = color || '#FFFF00';
-
-  for(var i = 0; i < matches.length; i++){
+  color = color || '#FF0000';
+  
+  for(var i = 0; i < matches.length; i++) {
     match = matches[i];
     match.textEl.setBackgroundColor(match.startOffset, match.endOffset, color);
   }
   return matches;
-}
+};
 
 function unHighlight(matches) {
   var textElement = null;
@@ -121,31 +135,31 @@ function unHighlight(matches) {
   for (var i = 0; i < matches.length; i++) {
     elements[matches[i].textElementIndex].getElement().asText().setBackgroundColor(matches[i].startOffset, matches[i].endOffset, matches[i].ogBgColor);
   }
-}
+};
 
-function applyTip(tip, replace, match){
+function applyTip(tip, replace, match) {
   searchDoc(tip.matched_string, function(textElementIndex, search, textElement) {
-    textElement.setBackgroundColor(search.index, search.index + search[0].length, match.ogBgColor);
+//    textElement.setBackgroundColor(search.index, search.index + search[0].length+1, match.ogBgColor);
     textElement.deleteText(search.index, search.index + search[0].length-1);
     textElement.insertText(search.index, replace);
 //    textElement.replaceText(regexForString(tip.matched_string), replace);
   });
   return true;
-}
+};
 
 function fetchGuides(query) {
   return Irregardless.fetchGuides(query);
-}
+};
 
 function fetchTips(guideId) {
   return Irregardless.fetchTips(guideId);
-}
+};
 
 //highlights the tip matches in red, and reverts the red higlight on lastScrollTip
 function scrollToTip(tip, lastScrollTip) {
   var matches = getDocMatches(tip),
       match = matches[0];
-  if(lastScrollTip){
+  if (lastScrollTip){
     highlight(lastScrollTip);
   }
   if(match){
@@ -153,5 +167,5 @@ function scrollToTip(tip, lastScrollTip) {
     DocumentApp.getActiveDocument().setCursor(position);
     highlight(tip, '#f49898');
   }
-}
+};
 

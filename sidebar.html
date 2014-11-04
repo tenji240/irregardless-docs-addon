@@ -533,16 +533,21 @@ Tip.prototype.render = function (){
   return $el;
 }
 
+var regexQuote = function(str) {
+    return (str+'').replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+};
+
 Tip.prototype.prepareSnippet = function(fullText, tip){
   //match will either be in the tip's `match_string`,
   //or the tips `matched_string`
-  var regex = new RegExp("\\b" + tip.matched_string + "\\b", 'ig')
+  var regex = new RegExp("(\\s|\\b)" + regexQuote(tip.matched_string) + "(\\s|\\b)", 'ig')
     , snippet
     , indexOfM;
   //if text is short, snippet is the text
   if(fullText.length < 100) {
     snippet = fullText;
   } else {
+    debugger;
     indexOfM = regex.exec(fullText).index
     //match is in the first 50 characters
     if(indexOfM < 50){
@@ -555,7 +560,7 @@ Tip.prototype.prepareSnippet = function(fullText, tip){
      snippet = fullText.slice(indexOfM - 40, indexOfM + 40) + "...";
     }
   }
-  return snippet.replace(regex, "<span class=\"match-content\">" + tip.matched_string +"</span>");
+  return snippet.replace(regex, " <span class=\"match-content\">" + tip.matched_string +"</span> ");
 }
 
 
@@ -598,7 +603,7 @@ var SideBarObj = function() {
    
    this.showTips = function(fullText, tips){
      $notice.hide();
-     if(tips.length){
+     if(tips.length) {
        for (var i = 0; i < tips.length; i++) {
          var tip = tips[i];
          GoogleInterface.highlight(tip);
@@ -666,7 +671,7 @@ var GoogleInterface = new function() {
   var matches;
   var lastScrollTip;
   
-  var matchForTip = function(tip) {
+  this.matchForTip = function(tip) {
     return $.grep(matches, function(match) { return match.text == tip.matched_string; })[0];
   }
   
@@ -683,19 +688,20 @@ var GoogleInterface = new function() {
    
   this.removeHighlights = function () {
     google.script.run
-        .withSuccessHandler(function() { })
+        .withSuccessHandler(function() { lastScrollTip = null; })
         .withFailureHandler(
           function() { SideBar.showError(); })
         .unHighlight(matches);
   }
 
   this.applyTip = function(tip, replace) {
-    var tipMatch = matchForTip(tip);
+    var self = this
+      , tipMatch = this.matchForTip(tip);
     google.script.run
         .withSuccessHandler(
           function() {
-            matches = $.grep(matches, function(match) { return match.text != tip.matched_string; });
-            Irregardless.fetchTips()
+            //matches = $.grep(matches, function(match) { return match.text != tip.matched_string; });
+            self.highlight(tip);
           })
         .withFailureHandler(
           function() {
@@ -705,6 +711,7 @@ var GoogleInterface = new function() {
   }
   
   this.scrollToTip = function(tip) {
+  debugger;
     google.script.run
         .withSuccessHandler(function(){
           lastScrollTip = tip;
@@ -790,7 +797,7 @@ $(function() {
   });
   $(document).on("click", "[data-apply-tip]", function(evt){
     var tip = $(this).closest(".tip-container").data('tipObject');
-    GoogleInterface.applyTip(tip, $(this).data('replacement'));
+    GoogleInterface.applyTip(tip, $(this).data('replacement'), GoogleInterface.matchForTip(tip));
     evt.stopPropagation();
   });
   $(document).on("click", "[data-get-tips]", function(){
@@ -809,7 +816,10 @@ $(function() {
   });
   $(document).on("click", "[data-save-settings]", function(){
     SideBar.closeSettings();
-    Irregardless.fetchTips();
+    GoogleInterface.removeHighlights();
+    setTimeout(function() {
+      Irregardless.fetchTips();
+    }, 1500);
   });
 
   $(document).on("click", "#toggle-autorun", function(){
