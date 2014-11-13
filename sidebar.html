@@ -229,6 +229,19 @@
   .tip-container:nth-child(even) {
     background: #fdfdfd;
   }
+  .close-tip {
+    color: #888;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    display: none;
+  }
+  .tip-container:hover .close-tip {
+    display: block;
+  }
+  .tip-container:hover .tip-border {
+    border: none;
+  }
   .tip-border {
     position: absolute;
     left: 0;
@@ -509,7 +522,7 @@ Tip.prototype.truncate = function (string, length){
 }
 
 Tip.prototype.render = function (){
-  var beginning = "<li class=\"tip-container\" data-tip-container>"+
+  var beginning = "<li id='tip-" + this.tip.id + "' class=\"tip-container\" data-tip-container>"+
     "<div class=\"creator\">"+
       "<a href='http://irregardless.ly/#!/profile/" + this.tip.creator.id + "' target='_blank'>"+
         "<img src=\""+ this.tip.creator.mugshot_url+"\" title=\""+ this.tip.creator.name.split(' ')[0] + "\" alt=\""+ this.tip.creator.name.split(' ')[0] + "\" />"+
@@ -524,7 +537,7 @@ Tip.prototype.render = function (){
         this.linkify(this.truncate(this.tip.explanation, 230)) +
         "<a href=\"http://irregardless.ly/#!/tip/" + this.tip.id + "\" target=\"_blank\" class=\"more-link\"> more</a>" +
       "</div>" +
-      "<div class='tip-border'></div>";
+      "<div class='tip-border'><a href='javascript://' data-tip-id='" + this.tip.id + "' class='close-tip'>X</a></div>";
 
     var end = "</div>"+
         "</li>";
@@ -547,7 +560,6 @@ Tip.prototype.prepareSnippet = function(fullText, tip){
   if(fullText.length < 100) {
     snippet = fullText;
   } else {
-    debugger;
     indexOfM = regex.exec(fullText).index
     //match is in the first 50 characters
     if(indexOfM < 50){
@@ -711,7 +723,6 @@ var GoogleInterface = new function() {
   }
   
   this.scrollToTip = function(tip) {
-  debugger;
     google.script.run
         .withSuccessHandler(function(){
           lastScrollTip = tip;
@@ -810,6 +821,9 @@ $(function() {
   });
   $(document).on("click", "[data-toggle-settings]", function(){
     SideBar.showSettings();
+  });
+  $(document).on("click", ".close-tip", function(){
+    $('#tip-' + $(this).data('tip-id')).remove();
   });
   $(document).on("click", "[data-close-settings]", function(){
     SideBar.closeSettings();

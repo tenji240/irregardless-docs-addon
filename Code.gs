@@ -113,7 +113,7 @@ function highlight(tip, color) {
   var matches = getDocMatches(tip),
       match;
 
-  color = color || '#FF0000';
+  color = color || '#FFFF00';
   
   for(var i = 0; i < matches.length; i++) {
     match = matches[i];
